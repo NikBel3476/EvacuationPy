@@ -1,5 +1,4 @@
-import BldDataModel
+import BimDataModel
 
-building = BldDataModel.mapping_building('resources/building_example.json')
+building = BimDataModel.mapping_building('resources/building_example.json')
 
-print(building.name)
