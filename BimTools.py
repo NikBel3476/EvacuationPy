@@ -8,37 +8,44 @@ NDIGITS:int = 4
 class Bim:
 
     def __init__(self, bim:BBuilding) -> None:
-        self.list_of_elements = {}
+        self.zones = {}
+        self.transits = {}
+
+        self._area = 0
+        self._num_of_people = 0
 
         for l in bim.levels:
             for e in l.elements:
                 element = None
                 if e.sign == BSign.Room or e.sign == BSign.Staircase:
                     element = Zone(e)
+                    self._area += element.area
+                    self._num_of_people += element.num_of_people
+                    self.zones[e.id] = element
                 elif e.sign == BSign.DoorWay or e.sign == BSign.DoorWayInt or e.sign == BSign.DoorWayOut:
                     element = Transit(e)
-                self.list_of_elements[e.id] = element
+                    self.transits[e.id] = element
 
+        t: Transit # for typing the variable
+        for t in self.transits.values():
+            z_linked:Zone = self.zones[t.output[0]]
+            t.calculate_width(z_linked)
+            
 
-    def get_num_of_people(self) -> float:
-        return 0.0
+    @property
+    def num_of_people(self) -> float:
+        return self._num_of_people
 
-    def set_num_of_people(self) -> None:
-        pass
+    @property
+    def area(self) -> float:
+        return self._area
 
-    def get_area(self) -> float:
-        return 0.0
-
-
-class Polygon:
-    def __init__(self, points: list) -> None:
-        pass
+    
 
 class Transit(BBuildElement):
 
     def __init__(self, build_element:BBuildElement) -> None:
-        self.width = 0.0
-        self._build_element = build_element
+        super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
     
     @property
     def width(self) -> float:
@@ -51,7 +58,7 @@ class Transit(BBuildElement):
         self._width = w
 
     def calculate_width(self, zone_element:BBuildElement) -> None:
-        transit_points = [[p.x, p.y] for p in self._build_element.points[:-1]]
+        transit_points = [[p.x, p.y] for p in self.points[:-1]]
         zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
         zone_tri = Delaunay(zone_points)
 
@@ -114,34 +121,40 @@ class Transit(BBuildElement):
         return True
     
     def __repr__(self) -> str:
-        return f"Transit(name:{self._build_element.name})"
+        return f"Transit(name:{self.name})"
 
 class Zone(BBuildElement):
 
     def __init__(self, build_element:BBuildElement) -> None:
-        self._area = 0.0
-        self._points = [[p.x, p.y] for p in build_element.points[:-1]]
-        self._num_of_people = 0.0
-        self._build_element = build_element
+        super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
+        
+        self.num_of_people = 0.0
+        self._points = [[p.x, p.y] for p in self.points[:-1]]
+        self._calculate_area()
 
-    def get_area(self) -> float:
+    @property
+    def area(self) -> float:
+        return self._area
+    
+    def _calculate_area(self):
         def triangle_area(p1, p2, p3) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        if self._area == 0.0:
-            self._tri = Delaunay(self._points)
-            self._area = round(sum(triangle_area(self._tri.points[tr[0]], self._tri.points[tr[1]], self._tri.points[tr[2]]) for tr in self._tri.simplices), NDIGITS)
-        
-        return self._area
+        self._tri = Delaunay(self._points)
+        self._area = round(sum(triangle_area(self._tri.points[tr[0]], self._tri.points[tr[1]], self._tri.points[tr[2]]) for tr in self._tri.simplices), NDIGITS)
 
-    def get_num_of_people(self) -> float:
+    @property
+    def num_of_people(self) -> float:
         return self._num_of_people
     
-    def set_num_of_people(self, n: float) -> None:
-        self._num_of_people += n
+    @num_of_people.setter
+    def num_of_people(self, n: float) -> None:
+        if n < 0:
+            raise ValueError("Number of people in zone below 0 is not possible")
+        self._num_of_people = n
 
     def __repr__(self) -> str:
-        return f"Zone(name:{self._build_element.name})"
+        return f"Zone(name:{self.name})"
 
 
 # Tests
@@ -151,7 +164,7 @@ if __name__ == "__main__":
     print('Zone test')
     be1 = building.levels[0].elements[1]
     z1 = Zone(be1)
-    print(z1.get_area())
+    print(z1.area)
 
     # for l in building.levels:
     #     for e in l.elements:
@@ -177,5 +190,6 @@ if __name__ == "__main__":
     # Test Bim
     print('== BIM test ==')
     bim = Bim(building)
-    for k, v in bim.list_of_elements.items():
-        print(k, v)
+    v:Transit
+    for k, v in bim.transits.items():
+        print(k, v.width)
