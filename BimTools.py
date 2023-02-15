@@ -1,10 +1,24 @@
 from scipy.spatial import Delaunay
 from typing import Sequence
-from BimDataModel import BBuildElement, BPoint, BSign, mapping_building
+
+from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
 
 NDIGITS:int = 4
 
 class Bim:
+
+    def __init__(self, bim:BBuilding) -> None:
+        self.list_of_elements = {}
+
+        for l in bim.levels:
+            for e in l.elements:
+                element = None
+                if e.sign == BSign.Room or e.sign == BSign.Staircase:
+                    element = Zone(e)
+                elif e.sign == BSign.DoorWay or e.sign == BSign.DoorWayInt or e.sign == BSign.DoorWayOut:
+                    element = Transit(e)
+                self.list_of_elements[e.id] = element
+
 
     def get_num_of_people(self) -> float:
         return 0.0
@@ -16,22 +30,34 @@ class Bim:
         return 0.0
 
 
+class Polygon:
+    def __init__(self, points: list) -> None:
+        pass
+
 class Transit(BBuildElement):
 
     def __init__(self, build_element:BBuildElement) -> None:
-        self._width = 0.0
+        self.width = 0.0
         self._build_element = build_element
-        
-    def get_width(self) -> float:
+    
+    @property
+    def width(self) -> float:
         return self._width
     
-    def set_width(self, w: float) -> None:
+    @width.setter
+    def width(self, w: float) -> None:
+        if w <= 0.0:
+            raise ValueError("Width of transit below or equal 0 is not possible")
         self._width = w
 
-    def calculate_width(self, build_element:BBuildElement) -> None:
+    def calculate_width(self, zone_element:BBuildElement) -> None:
         transit_points = [[p.x, p.y] for p in self._build_element.points[:-1]]
-        edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, build_element)]
+        zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
+        zone_tri = Delaunay(zone_points)
+
+        edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
+        
         p1 = transit_points.pop(edge_points[0])
         p2 = transit_points.pop(edge_points[1])
         p3 = transit_points.pop(1)
@@ -43,7 +69,7 @@ class Transit(BBuildElement):
         # print(edge_points, self._width)
         
 
-    def _point_in_polygon(self, point, build_element:BBuildElement) -> bool:
+    def _point_in_polygon(self, point, zone_tri:Delaunay) -> bool:
         '''
         Проверка вхождения точки в прямоугольник
 
@@ -52,9 +78,7 @@ class Transit(BBuildElement):
         После получения треугольников поподает ли точка в треугольник, для чего выполняется проверка 
         с какой стороны от стороны треугольника находится точка.
         '''
-        _points = [[p.x, p.y] for p in build_element.points[:-1]]
-        _tri = Delaunay(_points)
-
+        
         def where_point(a, b, p) -> int:
             '''
             Проверка с какой стороны находится точка \n
@@ -81,8 +105,8 @@ class Transit(BBuildElement):
         '''
         Проверяем в какие треугольники попадает точка
         '''
-        for tr in _tri.simplices:
-            if is_point_in_triangle([_tri.points[tr[0]], _tri.points[tr[1]], _tri.points[tr[2]]], point):
+        for tr in zone_tri.simplices:
+            if is_point_in_triangle([zone_tri.points[tr[0]], zone_tri.points[tr[1]], zone_tri.points[tr[2]]], point):
                 break
         else: # В это условие попадаем, если прошли цикл
             return False
@@ -147,3 +171,11 @@ if __name__ == "__main__":
     print(z1)
     print(t1)
     t1.calculate_width(be1)
+    print(t1.width)
+
+
+    # Test Bim
+    print('== BIM test ==')
+    bim = Bim(building)
+    for k, v in bim.list_of_elements.items():
+        print(k, v)
