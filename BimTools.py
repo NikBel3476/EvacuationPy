@@ -1,5 +1,6 @@
 from scipy.spatial import Delaunay
 from typing import Sequence
+from uuid import UUID
 
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
 
@@ -13,6 +14,7 @@ class Bim:
 
         self._area = 0
         self._num_of_people = 0
+        self._sz_output = []
 
         for l in bim.levels:
             for e in l.elements:
@@ -25,13 +27,17 @@ class Bim:
                 elif e.sign == BSign.DoorWay or e.sign == BSign.DoorWayInt or e.sign == BSign.DoorWayOut:
                     element = Transit(e)
                     self.transits[e.id] = element
+                    if len(element.output) == 1:
+                        self._sz_output.append(e.id)
 
         t: Transit # for typing the variable
         for t in self.transits.values():
             z_linked:Zone = self.zones[t.output[0]]
             t.calculate_width(z_linked)
-            
 
+        self._init_safety_zone()
+        self.zones[self.safety_zone.id] = self.safety_zone
+            
     @property
     def num_of_people(self) -> float:
         return self._num_of_people
@@ -39,6 +45,15 @@ class Bim:
     @property
     def area(self) -> float:
         return self._area
+    
+    @property
+    def safety_zone(self) -> 'Zone':
+        return self._safety_zone
+
+    def _init_safety_zone(self):
+        e = BBuildElement(UUID('e6315dac-ad4b-11ed-9732-d36b774c66a1'), BSign.Room, self._sz_output, 
+                          [BPoint(0, 0), BPoint(1000, 0), BPoint(1000, 1000), BPoint(0, 1000), BPoint(0, 0)], 'Safety zone')
+        self._safety_zone = Zone(e)
 
     
 
@@ -46,6 +61,12 @@ class Transit(BBuildElement):
 
     def __init__(self, build_element:BBuildElement) -> None:
         super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
+
+        self.potential = 0.0
+        self.num_of_people = 0.0
+        self.is_visited = False
+        self.is_blocked = False
+        self.is_safe = False
     
     @property
     def width(self) -> float:
@@ -127,10 +148,14 @@ class Zone(BBuildElement):
 
     def __init__(self, build_element:BBuildElement) -> None:
         super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
-        
-        self.num_of_people = 0.0
-        self._points = [[p.x, p.y] for p in self.points[:-1]]
+       
         self._calculate_area()
+
+        self.potential = 0.0
+        self.num_of_people = 0.0
+        self.is_visited = False
+        self.is_blocked = False
+        self.is_safe = False
 
     @property
     def area(self) -> float:
@@ -140,7 +165,7 @@ class Zone(BBuildElement):
         def triangle_area(p1, p2, p3) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri = Delaunay(self._points)
+        self._tri = Delaunay([[p.x, p.y] for p in self.points[:-1]])
         self._area = round(sum(triangle_area(self._tri.points[tr[0]], self._tri.points[tr[1]], self._tri.points[tr[2]]) for tr in self._tri.simplices), NDIGITS)
 
     @property
@@ -155,6 +180,9 @@ class Zone(BBuildElement):
 
     def __repr__(self) -> str:
         return f"Zone(name:{self.name})"
+    
+    def __hash__(self):
+        return hash(self.id)
 
 
 # Tests
@@ -173,7 +201,6 @@ if __name__ == "__main__":
 
     # Test Transit
     print('Transit test')
-    from uuid import UUID
     # z1: Zone
     t1: Transit
     for l in building.levels:
@@ -193,3 +220,5 @@ if __name__ == "__main__":
     v:Transit
     for k, v in bim.transits.items():
         print(k, v.width)
+    
+    print(bim.safety_zone.area)
