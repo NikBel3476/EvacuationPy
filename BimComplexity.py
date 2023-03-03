@@ -62,9 +62,10 @@ class BimComplexity(object):
                 if giving_zone.id == receiving_zone.id:
                     giving_zone = self.bim.zones[transit.output[1]]
                 
-                # if giving_zone.graph_level != 0:
-                #     print(giving_zone, giving_zone.graph_level)
-                giving_zone.graph_level = current_graph_level + 1
+                if not giving_zone.is_visited:
+                    giving_zone.graph_level = current_graph_level + 1
+
+                giving_zone.is_visited = True
                 transit.is_visited = True
 
                 if len(graph_level_elemnts) - 1 < giving_zone.graph_level:
@@ -76,7 +77,6 @@ class BimComplexity(object):
                     zones_to_process.add(giving_zone)
 
                 max_graph_level = max(max_graph_level, giving_zone.graph_level)
-                # print(giving_zone.name, giving_zone.graph_level)
 
             if len(zones_to_process) == 0:
                 break

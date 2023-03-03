@@ -86,6 +86,9 @@ class Transit(BBuildElement):
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
         
+        if not len(edge_points):
+            raise ValueError(f"Polygons don't intersect: Transit({self.id}), Zone({zone_element.id})")
+        
         p1 = transit_points.pop(edge_points[0])
         p2 = transit_points.pop(edge_points[1])
         p3 = transit_points.pop(1)
@@ -156,6 +159,7 @@ class Zone(BBuildElement):
         self.is_visited = False
         self.is_blocked = False
         self.is_safe = False
+        self.graph_level = 0
 
     @property
     def area(self) -> float:
