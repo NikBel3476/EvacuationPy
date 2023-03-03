@@ -1,13 +1,13 @@
 import BimDataModel
-from BimTools import Bim, Transit, Zone
+from BimTools import Bim
 from BimComplexity import BimComplexity
 
-building = BimDataModel.mapping_building('resources/cfast-learn_2d.json')
-# building = BimDataModel.mapping_building('resources/building_example.json')
+file = "building.json"
 
-bim = Bim(building)
+bim = Bim(BimDataModel.mapping_building(file))
+bc  = BimComplexity(bim)
 
-bc = BimComplexity(bim)
-print(bc)
-
-
+print(f"N_w = {bc.number_of_zones   } - Number of zones")
+print(f"N_b = {bc.number_of_transits} - Number of transits")
+print(f"M_w = {bc.width_of_bim_graph} - Width graph")
+print(f"L_w = {bc.depth_of_bim_graph} - Depth graph")
