@@ -52,6 +52,7 @@ class BimComplexity(object):
 
         while True:
             current_graph_level = receiving_zone.graph_level
+            max_graph_level = max(max_graph_level, receiving_zone.graph_level)
 
             transit: Transit
             for transit in (self.bim.transits[tid] for tid in receiving_zone.output):
@@ -62,21 +63,20 @@ class BimComplexity(object):
                 if giving_zone.id == receiving_zone.id:
                     giving_zone = self.bim.zones[transit.output[1]]
                 
-                if not giving_zone.is_visited:
-                    giving_zone.graph_level = current_graph_level + 1
+                if giving_zone.is_visited:
+                    continue
 
-                giving_zone.is_visited = True
-                transit.is_visited = True
+                giving_zone.graph_level = current_graph_level + 1
 
                 if len(graph_level_elemnts) - 1 < giving_zone.graph_level:
                     graph_level_elemnts.append(1)
                 else:
                     graph_level_elemnts[giving_zone.graph_level] += 1
 
-                if len(giving_zone.output) > 1: # отсекаем помещения, в которых одна дверь
-                    zones_to_process.add(giving_zone)
+                zones_to_process.add(giving_zone)
 
-                max_graph_level = max(max_graph_level, giving_zone.graph_level)
+                giving_zone.is_visited = True
+                transit.is_visited = True
 
             if len(zones_to_process) == 0:
                 break
@@ -85,6 +85,10 @@ class BimComplexity(object):
         
         self.width_of_bim_graph = max(graph_level_elemnts)
         self.depth_of_bim_graph = max_graph_level
+
+        visited_zones = list(filter(lambda x: x.is_visited, self.bim.zones.values()))
+        if len(visited_zones) != len(self.bim.zones.values()) - 1:
+            raise ValueError("Connectivity on the graph is broken")
 
     
     def __str__(self) -> str:
