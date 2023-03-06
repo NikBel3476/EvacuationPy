@@ -56,16 +56,15 @@ def mapping_building(file_buildingjson:str) -> BBuilding:
         for level in rjson['Level']:
             _elements:Sequence[BBuildElement] = []
             for element in level['BuildElement']:
-                _points = [BPoint(p['x'], p['y'], level['ZLevel']) for p in element['XY'][0]['points']]
-                try:
-                    build_element = BBuildElement(id=UUID(element['Id']),
-                                                        sign=BSign.from_str(element['Sign']),
-                                                        name=element['Name'],
-                                                        sizeZ=element['SizeZ'],
-                                                        output=[UUID(uuid) for uuid in element['Output']],
-                                                        points=_points)
-                except KeyError:
-                    print("\nERROR!!! -> ", element['Id'])
+                _sign = BSign.from_str(element['Sign'])
+                _sizeZ = element['SizeZ'] if not (_sign == BSign.DoorWay) else 0.0
+
+                build_element = BBuildElement(id=UUID(element['Id']),
+                                                    sign=_sign,
+                                                    name=element['Name'],
+                                                    sizeZ=_sizeZ,
+                                                    output=[UUID(uuid) for uuid in element['Output']],
+                                                    points=[BPoint(p['x'], p['y'], level['ZLevel']) for p in element['XY'][0]['points']])
 
                 _elements.append(build_element)
 
