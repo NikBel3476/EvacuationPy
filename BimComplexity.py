@@ -89,7 +89,10 @@ class BimComplexity(object):
         visited_zones = list(filter(lambda x: x.is_visited, self.bim.zones.values()))
         if len(visited_zones) != len(self.bim.zones.values()) - 1:
             import inspect
-            print(f">GraphConnectivityException[{__file__}:{inspect.currentframe().f_lineno}]: Connectivity on the graph is broken. Zones below is unreachable:")
+            from types import FrameType
+            from typing import Union
+            frame: Union[FrameType, None] = inspect.currentframe()
+            print(f">GraphConnectivityException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]: Connectivity on the graph is broken. Zones below is unreachable:")
             for z in filter(lambda x: not x.is_visited and not (x.name == "Safety zone"), self.bim.zones.values()):
                 print(f"{z.sign.name}({z.id}, {z.name}) on level at {z.points[0].z}")
             

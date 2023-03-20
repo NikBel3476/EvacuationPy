@@ -1,5 +1,5 @@
 from scipy.spatial import Delaunay
-from typing import Sequence
+from typing import Sequence, Union
 from uuid import UUID
 
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
@@ -12,15 +12,15 @@ class Bim:
         self.zones = {}
         self.transits = {}
 
-        self._area = 0
-        self._num_of_people = 0
+        self._area = 0.0
+        self._num_of_people = 0.0
         self._sz_output = []
 
         for l in bim.levels:
             for e in l.elements:
-                element = None
+                element:Union[Zone, Transit]
                 if e.sign == BSign.Room or e.sign == BSign.Staircase:
-                    element = Zone(e, l.zlevel)
+                    element = Zone(e)
                     self._area += element.area
                     self._num_of_people += element.num_of_people
                     self.zones[e.id] = element
@@ -45,7 +45,9 @@ class Bim:
 
         if len(incorrect_transits) > 0:
             import inspect
-            print(f">TransitGeometryException[{__file__}:{inspect.currentframe().f_lineno}]. Please check next transits:")
+            from types import FrameType
+            frame: Union[FrameType, None] = inspect.currentframe()
+            print(f">TransitGeometryException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]. Please check next transits:")
             for t, z in incorrect_transits:
                 print(f"{t.sign.name}({t.id}), Zone({z.id}, name={z.name})")
                 
@@ -77,7 +79,7 @@ class Bim:
     def _init_safety_zone(self):
         e = BBuildElement(UUID('e6315dac-ad4b-11ed-9732-d36b774c66a1'), BSign.Room, self._sz_output, 
                           [BPoint(0, 0), BPoint(1000, 0), BPoint(1000, 1000), BPoint(0, 1000), BPoint(0, 0)], 'Safety zone')
-        self._safety_zone = Zone(e, 0.0)
+        self._safety_zone = Zone(e)
 
     
 
@@ -174,7 +176,7 @@ class Transit(BBuildElement):
 
 class Zone(BBuildElement):
 
-    def __init__(self, build_element:BBuildElement, level: float) -> None:
+    def __init__(self, build_element:BBuildElement) -> None:
         super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
        
         self._calculate_area()
@@ -231,11 +233,8 @@ if __name__ == "__main__":
     # Test Transit
     print('Transit test')
     # z1: Zone
-    t1: Transit
-    for l in building.levels:
-        be1 = list(filter(lambda be: be.id == UUID("4199e3d7-5f08-4aab-8997-3b7cb1cd8cd8"), l.elements))[0]
-        t1 = Transit(list(filter(lambda be: be.id == UUID("f46361f4-a99f-4e79-aebe-d36ebed45992"), l.elements))[0])
-        break
+    be1 = list(filter(lambda be: be.id == UUID("4199e3d7-5f08-4aab-8997-3b7cb1cd8cd8"), building.levels[0].elements))[0]
+    t1: Transit = Transit(list(filter(lambda be: be.id == UUID("f46361f4-a99f-4e79-aebe-d36ebed45992"), building.levels[0].elements))[0])
 
     print(z1)
     print(t1)

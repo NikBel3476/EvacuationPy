@@ -22,7 +22,7 @@ class PeopleFlow(object):
         v0 = v_max
         d0 = 0.65
         a  = 0.295
-        v0k = -1
+        v0k = -1.0
 
         if density_in_zone > d0:
             m = (1.25 - 0.05 * density_in_zone) if (density_in_zone > 5) else 1
@@ -52,17 +52,17 @@ class PeopleFlow(object):
 
     @staticmethod
     def speed_on_stair(density_in_zone:float, direction:int) -> float:
-        d0: float = 0.0
-        v0: float = 0.0
-        a : float = 0.0
+        d0 = 0.0
+        v0 = 0.0
+        a  = 0.0
 
         if direction > 0:
             d0 = 0.67
-            v0 = 50
+            v0 = 50.0
             a  = 0.305
         elif direction < 0:
             d0 = 0.89
-            v0 = 80
+            v0 = 80.0
             a  = 0.4
         else:
             raise ValueError("Value of 'direction' equal 0 is not possible")
