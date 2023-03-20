@@ -20,7 +20,7 @@ class Bim:
             for e in l.elements:
                 element = None
                 if e.sign == BSign.Room or e.sign == BSign.Staircase:
-                    element = Zone(e)
+                    element = Zone(e, l.zlevel)
                     self._area += element.area
                     self._num_of_people += element.num_of_people
                     self.zones[e.id] = element
@@ -30,10 +30,34 @@ class Bim:
                     if len(element.output) == 1:
                         self._sz_output.append(e.id)
 
+        incorrect_transits = []
         t: Transit # for typing the variable
         for t in self.transits.values():
             z_linked:Zone = self.zones[t.output[0]]
-            t.calculate_width(z_linked)
+            # TODO Calculate the width for transits of type DoorWay
+            if not (t.sign == BSign.DoorWayOut) and t.sign == BSign.DoorWay:
+                if z_linked.sign == BSign.Staircase and self.zones[t.output[1]].sign == BSign.Staircase:
+                    continue
+            
+            is_successful = t.calculate_width(z_linked)
+            if not is_successful:
+                incorrect_transits.append((t, z_linked))
+
+        if len(incorrect_transits) > 0:
+            import inspect
+            print(f">TransitGeometryException[{__file__}:{inspect.currentframe().f_lineno}]. Please check next transits:")
+            for t, z in incorrect_transits:
+                print(f"{t.sign.name}({t.id}), Zone({z.id}, name={z.name})")
+                
+            print(">>QGIS expression for find incorrect transits (use 'Select Features Using Expression'):")
+            print(' or '.join(f'id is \'{t.id}\'' for t, _ in incorrect_transits))
+            print("How to find a bad transition in QGIS:\n \
+    1) select layer doorNN\n \
+    2) open the attributes table \n \
+    3) click to select features using an expression \n \
+    4) enter expression: id is 'uuid'. Example: id is '9b9e7724-a021-4099-9dfe-c9b04fdf64ee' \n \
+    5) click the right-bottom button 'Select features'")
+            exit()
 
         self._init_safety_zone()
         self.zones[self.safety_zone.id] = self.safety_zone
@@ -53,7 +77,7 @@ class Bim:
     def _init_safety_zone(self):
         e = BBuildElement(UUID('e6315dac-ad4b-11ed-9732-d36b774c66a1'), BSign.Room, self._sz_output, 
                           [BPoint(0, 0), BPoint(1000, 0), BPoint(1000, 1000), BPoint(0, 1000), BPoint(0, 0)], 'Safety zone')
-        self._safety_zone = Zone(e)
+        self._safety_zone = Zone(e, 0.0)
 
     
 
@@ -78,7 +102,7 @@ class Transit(BBuildElement):
             raise ValueError("Width of transit below or equal 0 is not possible")
         self._width = w
 
-    def calculate_width(self, zone_element:BBuildElement) -> None:
+    def calculate_width(self, zone_element:BBuildElement) -> bool:
         transit_points = [[p.x, p.y] for p in self.points[:-1]]
         zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
         zone_tri = Delaunay(zone_points)
@@ -86,8 +110,8 @@ class Transit(BBuildElement):
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
         
-        if not len(edge_points):
-            raise ValueError(f"Polygons don't intersect: Transit({self.id}), Zone({zone_element.id})")
+        if not (len(edge_points) == 2):
+            return False
         
         p1 = transit_points.pop(edge_points[0])
         p2 = transit_points.pop(edge_points[1])
@@ -97,7 +121,8 @@ class Transit(BBuildElement):
         length = lambda p1, p2: pow(pow(p2[0] - p1[0], 2) + pow(p2[1] - p1[1], 2), 0.5)
 
         self._width = round((length(p1, p2) + length(p3, p4))/2, NDIGITS)
-        # print(edge_points, self._width)
+
+        return True
         
 
     def _point_in_polygon(self, point, zone_tri:Delaunay) -> bool:
@@ -149,7 +174,7 @@ class Transit(BBuildElement):
 
 class Zone(BBuildElement):
 
-    def __init__(self, build_element:BBuildElement) -> None:
+    def __init__(self, build_element:BBuildElement, level: float) -> None:
         super().__init__(build_element.id, build_element.sign, build_element.output, build_element.points, build_element.name, build_element.sizeZ)
        
         self._calculate_area()

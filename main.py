@@ -1,5 +1,5 @@
 import BimDataModel
-from BimTools import Bim, Transit, Zone
+from BimTools import Bim
 from BimComplexity import BimComplexity
 
 building = BimDataModel.mapping_building('resources/cfast-learn-2d.json')
@@ -9,5 +9,3 @@ bim = Bim(building)
 
 bc = BimComplexity(bim)
 print(bc)
-
-
