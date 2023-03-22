@@ -1,8 +1,10 @@
-import BimDataModel
+from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
 import math
 
-class PeopleFlow(object):
+class PeopleFlowVelocity(object):
+
+    MAX_SPEED = 100
     
     @staticmethod
     def velocity(v0:float, a:float, d:float, d0:float) -> float:
@@ -26,7 +28,7 @@ class PeopleFlow(object):
 
         if density_in_zone > d0:
             m = (1.25 - 0.05 * density_in_zone) if (density_in_zone > 5) else 1
-            v0k = PeopleFlow.velocity(v0, a, density_in_zone, d0) * m
+            v0k = PeopleFlowVelocity.velocity(v0, a, density_in_zone, d0) * m
 
             if (density_in_zone >= 9 and transit_width < 1.6):
                 v0k = 10 * (2.5 + 3.75 * transit_width) / d0
@@ -48,7 +50,7 @@ class PeopleFlow(object):
         d0 = 0.51
         a = 0.295
 
-        return PeopleFlow.velocity(v0, a, density_in_zone, d0) if density_in_zone > d0 else v0
+        return PeopleFlowVelocity.velocity(v0, a, density_in_zone, d0) if density_in_zone > d0 else v0
 
     @staticmethod
     def speed_on_stair(density_in_zone:float, direction:int) -> float:
@@ -67,37 +69,165 @@ class PeopleFlow(object):
         else:
             raise ValueError("Value of 'direction' equal 0 is not possible")
 
-        return PeopleFlow.velocity(v0, a, density_in_zone, d0) if density_in_zone > d0 else v0
+        return PeopleFlowVelocity.velocity(v0, a, density_in_zone, d0) if density_in_zone > d0 else v0
 
+class Moving(object):
 
-def evac_step(bim:Bim):
-    zones_to_process = set()
-    receiving_zone = bim.safety_zone
+    MODELLING_STEP = 0.01 # min
+    MIN_DENSIY = 0.1
+    MAX_DENSIY = 5.0
+    
+    def step(self, bim:Bim):
+        for t in bim.transits.values(): t.is_visited = False
+        for z in bim.zones.values(): z.is_visited = False
 
-    while True:
-        transit: Transit
-        for transit in (bim.transits[tid] for tid in receiving_zone.output):
-            if transit.is_visited or transit.is_blocked:
-                continue
+        zones_to_process = set([bim.safety_zone])
+        receiving_zone: Zone = zones_to_process.pop()
 
-            giving_zone: Zone = bim.zones[transit.output[0]]
-            if giving_zone.id == receiving_zone.id:
-                giving_zone = bim.zones[transit.output[1]]
+        while True:
             
-            giving_zone.is_visited = True
-            transit.is_visited = True
+            transit: Transit
+            for transit in (bim.transits[tid] for tid in receiving_zone.output):
+                if transit.is_visited or transit.is_blocked:
+                    continue
 
-            if len(giving_zone.output) > 1: # отсекаем помещения, в которых одна дверь
-                zones_to_process.add(giving_zone)
+                giving_zone: Zone = bim.zones[transit.output[0]]
+                if giving_zone.id == receiving_zone.id:
+                    giving_zone = bim.zones[transit.output[1]]
+                
+                giving_zone.potential = self.potential(receiving_zone, giving_zone, transit.width)
+                moved_people = self.part_of_people_flow(receiving_zone, giving_zone, transit)
 
-        receiving_zone = zones_to_process.pop()
-        print(receiving_zone, zones_to_process)
+                receiving_zone.num_of_people += moved_people
+                giving_zone.num_of_people -= moved_people
+                transit.num_of_people = moved_people
 
-        if len(zones_to_process) == 0:
-            break
+                giving_zone.is_visited = True
+                transit.is_visited = True
+
+                if len(giving_zone.output) > 1: # отсекаем помещения, в которых одна дверь
+                    zones_to_process.add(giving_zone)
+
+            if len(zones_to_process) == 0:
+                break
+            
+            receiving_zone = zones_to_process.pop()
 
 
+    def potential(self, rzone:Zone, gzone:Zone, twidth:float) -> float:
+        p = math.sqrt(gzone.area) / self.speed_at_exit(rzone, gzone, twidth)
+        return rzone.potential + p
+    
+    def speed_at_exit(self, rzone:Zone, gzone:Zone, twidth:float) -> float:
+        #Определение скорости на выходе из отдающего помещения
+        zone_speed = self.speed_in_element(rzone, gzone)
+        density_in_giver_element = gzone.num_of_people / gzone.area
+        transition_speed = PeopleFlowVelocity.speed_through_transit(twidth, density_in_giver_element, PeopleFlowVelocity.MAX_SPEED)
+        
+        return min(zone_speed, transition_speed)
+
+    def speed_in_element(self, rzone:Zone, gzone:Zone) -> float:
+        density_in_giver_zone = gzone.num_of_people / gzone.area
+        # По умолчанию, используется скорость движения по горизонтальной поверхности
+        v_zone = PeopleFlowVelocity.speed_in_room(density_in_giver_zone, PeopleFlowVelocity.MAX_SPEED)
+
+        dh = rzone.points[0].z - gzone.points[0].z #Разница высот зон
+
+        # Если принимающее помещение является лестницей и находится на другом уровне,
+        # то скорость будет рассчитываться как по наклонной поверхности
+        if abs(dh) > 1e-3 and rzone.sign == BSign.Staircase:
+            '''Иначе определяем направление движения по лестнице
+            -1 вниз, 1 вверх
+                    ______   aGiverItem
+                   /                         => direction = -1
+                  /
+            _____/           aReceivingItem
+                 \
+                  \                          => direction = 1
+                   \______   aGiverItem
+            '''
+            direction:int = -1 if dh > 0 else 1
+            v_zone = PeopleFlowVelocity.speed_on_stair(density_in_giver_zone, direction)
+
+        if v_zone < 0:
+            raise ValueError(f"Скорость в отдающей зоне меньше 0: {gzone.name}")
+
+        return v_zone
+
+    def part_of_people_flow(self, rzone:Zone, gzone:Zone, transit:Transit) -> float:
+        area_giver_zone = gzone.area
+        people_in_giver_zone = gzone.num_of_people
+        density_in_giver_zone= people_in_giver_zone / area_giver_zone
+        density_min_giver_zone = 0.5 / area_giver_zone
+        # TODO Странное условие. PeopleFlowVelocity.MIN_DENSIY задавалась извне.
+        # density_min_giver_zone = self.MIN_DENSIY if self.MIN_DENSIY > 0 else 0.5 / area_giver_zone
+
+        # Ширина перехода между зонами зависит от количества человек,
+        # которое осталось в помещении. Если там слишком мало людей,
+        # то они переходя все сразу, чтоб не дробить их
+        door_width = transit.width; #(densityInElement > densityMin) ? aDoor.VCn().getWidth() : std::sqrt(areaElement);
+        speedatexit = self.speed_at_exit(rzone, gzone, door_width)
+
+        # Кол. людей, которые могут покинуть помещение
+        part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit) \
+                                if (density_in_giver_zone > density_min_giver_zone) \
+                                else people_in_giver_zone
+
+        # Т.к. зона вне здания принята безразмерной,
+        # в нее может войти максимально возможное количество человек
+        # Все другие зоны могут принять ограниченное количество человек.
+        # Т.о. нужно проверить может ли принимающая зона вместить еще людей.
+        # capacity_reciving_zone - количество людей, которое еще может
+        # вместиться до достижения максимальной плотности
+        # => если может вместить больше, чем может выйти, то вмещает всех вышедших,
+        # иначе вмещает только возможное количество.
+        max_numofpeople = self.MAX_DENSIY * rzone.area
+        capacity_reciving_zone = max_numofpeople - rzone.num_of_people
+        # Такая ситуация возникает при плотности в принимающем помещении более Dmax чел./м2
+        # Фактически capacity_reciving_zone < 0 означает, что помещение не может принять людей
+        if capacity_reciving_zone < 0: return 0
+        else: return part_of_people_flow if (capacity_reciving_zone > part_of_people_flow) else capacity_reciving_zone
+
+    def change_numofpeople(self, gzone:Zone, twidth:float, speed_at_exit:float) -> float:
+        densityInElement = gzone.num_of_people / gzone.area
+        # Величина людского потока, через проем шириной aWidthDoor, чел./мин
+        P = densityInElement * speed_at_exit * twidth
+        # Зная скорость потока, можем вычислить конкретное количество человек,
+        # которое может перейти в принимющую зону (путем умножения потока на шаг моделирования)
+        return P * self.MODELLING_STEP
 
 
 if __name__ == '__main__':
-    print(PeopleFlow.velocity(1,1,1,1))
+    # print(PeopleFlowVelocity.velocity(1,1,1,1))
+    import BimDataModel
+    from BimTools import Bim
+    from BimComplexity import BimComplexity
+    from BimEvac import Moving
+
+    # building = BimDataModel.mapping_building('resources/example-one-exit.json')
+    building = BimDataModel.mapping_building('resources/example-two-exits.json')
+    # building = BimDataModel.mapping_building('resources/building_example.json')
+
+    bim = Bim(building)
+    z:Zone
+    t: Transit
+
+    for z in bim.zones.values():
+        # if '5c4f4' in str(z.id):
+        if '7e466' in str(z.id) or '02707' in str(z.id):
+            z.num_of_people = 5
+
+    BimComplexity(bim) # check a building
+
+    m = Moving()
+
+    for z in bim.zones.values(): print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
+
+    for _ in range(10):
+        m.step(bim)
+        # for z in bim.zones.values():
+        #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
+        for t in bim.transits.values():
+            if t.sign == BSign.DoorWayOut:
+                print(f"{t}, Number of people: {t.num_of_people}")
+        print("========")
