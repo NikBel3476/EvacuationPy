@@ -4,7 +4,7 @@ from uuid import UUID
 
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
 
-NDIGITS:int = 4
+NDIGITS:int = 15
 
 class Bim:
 
@@ -77,8 +77,10 @@ class Bim:
         return self._safety_zone
 
     def _init_safety_zone(self):
+        import sys
+        s = sys.float_info.max**0.2
         e = BBuildElement(UUID('e6315dac-ad4b-11ed-9732-d36b774c66a1'), BSign.Room, self._sz_output, 
-                          [BPoint(0, 0), BPoint(1000, 0), BPoint(1000, 1000), BPoint(0, 1000), BPoint(0, 0)], 'Safety zone')
+                          [BPoint(0, 0), BPoint(s, 0), BPoint(s, s), BPoint(0, s), BPoint(0, 0)], 'Safety zone')
         self._safety_zone = Zone(e)
 
     
