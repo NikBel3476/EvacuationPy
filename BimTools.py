@@ -83,7 +83,11 @@ class Bim:
                           [BPoint(0, 0), BPoint(s, 0), BPoint(s, s), BPoint(0, s), BPoint(0, 0)], 'Safety zone')
         self._safety_zone = Zone(e)
 
-    
+    def set_density(self, value) -> None:
+        z: Zone
+        for z in filter(lambda x: not (x.id == self.safety_zone.id), self.zones.values()):
+            z.density = value
+  
 
 class Transit(BBuildElement):
 
@@ -122,7 +126,7 @@ class Transit(BBuildElement):
         p3 = transit_points.pop(1)
         p4 = transit_points.pop(0)
 
-        length = lambda p1, p2: pow(pow(p2[0] - p1[0], 2) + pow(p2[1] - p1[1], 2), 0.5)
+        length = lambda p1, p2: pow((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2, 0.5)
 
         self._width = round((length(p1, p2) + length(p3, p4))/2, NDIGITS)
 
@@ -189,6 +193,7 @@ class Zone(BBuildElement):
         self.is_blocked = False
         self.is_safe = False
         self.graph_level = 0
+        self.density = self.num_of_people/self.area
 
     @property
     def area(self) -> float:
@@ -210,6 +215,18 @@ class Zone(BBuildElement):
         if n < 0:
             raise ValueError("Number of people in zone below 0 is not possible")
         self._num_of_people = n
+        self._density = self._num_of_people/self.area
+
+    @property
+    def density(self) -> float:
+        return self._density
+    
+    @density.setter
+    def density(self, value:float) -> None:
+        if value < 0:
+            raise ValueError("Density of people flow in zone below 0 is not possible")
+        self._density = value
+        self._num_of_people = self._density * self.area
 
     def __repr__(self) -> str:
         return f"Zone(name:{self.name})"

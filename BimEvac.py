@@ -219,18 +219,21 @@ if __name__ == '__main__':
     for t in bim.transits.values():
         print(f"{t.name} -- {t.width}")
 
-    density = 1
-    for z in wo_safety:
-        # if '5c4f4' in str(z.id):
-        # if '7e466' in str(z.id) or '02707' in str(z.id):
-        z.num_of_people = density * z.area
+    density = 1.0
+    # for z in wo_safety:
+    #     # if '5c4f4' in str(z.id):
+    #     # if '7e466' in str(z.id) or '02707' in str(z.id):
+    #     z.num_of_people = density * z.area
+    
+    bim.set_density(density)
 
     for z in wo_safety:
         print(z.num_of_people)
 
     m = Moving()
 
-    for z in bim.zones.values(): print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
+    for z in bim.zones.values():
+        print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}, Density: {z.density}")
 
     time = 0.0
     for _ in range(1000):
@@ -240,14 +243,15 @@ if __name__ == '__main__':
         #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
         for t in bim.transits.values():
             if t.sign == BSign.DoorWayOut:
-                print(f"{t}, Number of people: {t.num_of_people}")
+                pass
+                # print(f"{t}, Number of people: {t.num_of_people}")
 
         nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
         # if nop < 10e-3:
         if nop <= 0:
             break
         
-        print("========", nop, bim.safety_zone.num_of_people)
+        # print("========", nop, bim.safety_zone.num_of_people)
     
     print(f'Длительность эвакуации: {time*60:.{4}} с. ({time:.{4}} мин.)')
     nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
