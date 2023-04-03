@@ -1,3 +1,4 @@
+from functools import reduce
 from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
 import math
@@ -41,12 +42,12 @@ class PeopleFlowVelocity(object):
         return v0k
 
     @staticmethod
-    def speed_in_room(density_in_zone:float, v_max:float) -> float:
+    def speed_in_room(density_in_zone:float) -> float:
         '''density_in_zone - плотность в элементе, из которого выходит поток
 
         return Скорость потока по горизонтальному пути, м/мин'''
 
-        v0 = v_max # м/мин
+        v0 = PeopleFlowVelocity.MAX_SPEED # м/мин
         d0 = 0.51
         a = 0.295
 
@@ -129,7 +130,7 @@ class Moving(object):
     def speed_in_element(self, rzone:Zone, gzone:Zone) -> float:
         density_in_giver_zone = gzone.num_of_people / gzone.area
         # По умолчанию, используется скорость движения по горизонтальной поверхности
-        v_zone = PeopleFlowVelocity.speed_in_room(density_in_giver_zone, PeopleFlowVelocity.MAX_SPEED)
+        v_zone = PeopleFlowVelocity.speed_in_room(density_in_giver_zone)
 
         dh = rzone.points[0].z - gzone.points[0].z #Разница высот зон
 
@@ -158,9 +159,8 @@ class Moving(object):
         area_giver_zone = gzone.area
         people_in_giver_zone = gzone.num_of_people
         density_in_giver_zone= people_in_giver_zone / area_giver_zone
-        density_min_giver_zone = 0.5 / area_giver_zone
-        # TODO Странное условие. PeopleFlowVelocity.MIN_DENSIY задавалась извне.
-        # density_min_giver_zone = self.MIN_DENSIY if self.MIN_DENSIY > 0 else 0.5 / area_giver_zone
+        # density_min_giver_zone = 0.5 / area_giver_zone
+        density_min_giver_zone = self.MIN_DENSIY if self.MIN_DENSIY > 0 else 0.5 / area_giver_zone
 
         # Ширина перехода между зонами зависит от количества человек,
         # которое осталось в помещении. Если там слишком мало людей,
@@ -185,7 +185,7 @@ class Moving(object):
         capacity_reciving_zone = max_numofpeople - rzone.num_of_people
         # Такая ситуация возникает при плотности в принимающем помещении более Dmax чел./м2
         # Фактически capacity_reciving_zone < 0 означает, что помещение не может принять людей
-        if capacity_reciving_zone < 0: return 0
+        if capacity_reciving_zone < 0: return 0.0
         else: return part_of_people_flow if (capacity_reciving_zone > part_of_people_flow) else capacity_reciving_zone
 
     def change_numofpeople(self, gzone:Zone, twidth:float, speed_at_exit:float) -> float:
@@ -209,25 +209,46 @@ if __name__ == '__main__':
     # building = BimDataModel.mapping_building('resources/building_example.json')
 
     bim = Bim(building)
-    z:Zone
-    t: Transit
-
-    for z in bim.zones.values():
-        # if '5c4f4' in str(z.id):
-        if '7e466' in str(z.id) or '02707' in str(z.id):
-            z.num_of_people = 5
-
     BimComplexity(bim) # check a building
+
+    z: Zone
+    t: Transit
+    wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
+
+    # Doors width
+    for t in bim.transits.values():
+        print(f"{t.name} -- {t.width}")
+
+    density = 1
+    for z in wo_safety:
+        # if '5c4f4' in str(z.id):
+        # if '7e466' in str(z.id) or '02707' in str(z.id):
+        z.num_of_people = density * z.area
+
+    for z in wo_safety:
+        print(z.num_of_people)
 
     m = Moving()
 
     for z in bim.zones.values(): print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
 
-    for _ in range(10):
+    time = 0.0
+    for _ in range(1000):
         m.step(bim)
+        time += Moving.MODELLING_STEP
         # for z in bim.zones.values():
         #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
         for t in bim.transits.values():
             if t.sign == BSign.DoorWayOut:
                 print(f"{t}, Number of people: {t.num_of_people}")
-        print("========")
+
+        nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
+        # if nop < 10e-3:
+        if nop <= 0:
+            break
+        
+        print("========", nop, bim.safety_zone.num_of_people)
+    
+    print(f'Длительность эвакуации: {time*60:.{4}} с. ({time:.{4}} мин.)')
+    nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
+    # print("========", nop, bim.safety_zone.num_of_people)
