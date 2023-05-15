@@ -72,7 +72,7 @@ class PeopleFlowVelocity(object):
             D = d * self.projection_area
 
             m = 1 if D <= 0.5 else 1.25 - 0.5 * D
-            q = PeopleFlowVelocity.velocity(v0, a, d0, d) * m * D
+            q = PeopleFlowVelocity.velocity(v0, a, d0, d) * D * m
 
             if D >= 0.9:
                 q = 2.5 + 3.75 * width if width < 1.6 else 8.5
@@ -119,22 +119,30 @@ class PeopleFlowVelocity(object):
 
 class Moving(object):
 
-    MODELLING_STEP = 0.01 # min
-    MIN_DENSIY = 0.1
-    MAX_DENSIY = 5.0
+    MODELLING_STEP = 0.008  # мин.
+    MIN_DENSIY = 0.1        # чел./м2
+    MAX_DENSIY = 5.0        # чел./м2
 
     def __init__(self) -> None:
         self.pfv = PeopleFlowVelocity(projection_area=0.1)
+        self._step_counter = [0, 0, 0]
     
     def step(self, bim:Bim):
+        self._step_counter[0] += 1
         for t in bim.transits.values(): t.is_visited = False
         for z in bim.zones.values(): z.is_visited = False
 
         zones_to_process = set([bim.safety_zone])
         receiving_zone: Zone = zones_to_process.pop()
 
+        self._step_counter[1] = 0
+
+        if self._step_counter[0] == 24:
+            print(end="")
+
         while True:
             
+            self._step_counter[2] = 0
             transit: Transit
             for transit in (bim.transits[tid] for tid in receiving_zone.output):
                 if transit.is_visited or transit.is_blocked:
@@ -156,11 +164,15 @@ class Moving(object):
 
                 if len(giving_zone.output) > 1: # отсекаем помещения, в которых одна дверь
                     zones_to_process.add(giving_zone)
+                
+                self._step_counter[2] += 1
 
             if len(zones_to_process) == 0:
                 break
             
             receiving_zone = zones_to_process.pop()
+
+            self._step_counter[1] += 1
 
 
     def potential(self, rzone:Zone, gzone:Zone, twidth:float) -> float:
@@ -198,18 +210,20 @@ class Moving(object):
 
     def part_of_people_flow(self, rzone:Zone, gzone:Zone, transit:Transit) -> float:
         # density_min_giver_zone = 0.5 / area_giver_zone
-        density_min_giver_zone = self.MIN_DENSIY if self.MIN_DENSIY > 0 else 0.5 / gzone.area
+        min_density_gzone = self.MIN_DENSIY #if self.MIN_DENSIY > 0 else self.pfv.projection_area * 0.5 / gzone.area
 
         # Ширина перехода между зонами зависит от количества человек,
         # которое осталось в помещении. Если там слишком мало людей,
         # то они переходя все сразу, чтоб не дробить их
-        door_width = transit.width #(densityInElement > densityMin) ? aDoor.VCn().getWidth() : std::sqrt(areaElement);
+        door_width = transit.width if gzone.density > min_density_gzone else gzone.area #transit.width
         speedatexit = self.speed_at_exit(rzone, gzone, door_width)
 
-        # Кол. людей, которые могут покинуть помещение
-        part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit) \
-                                if (gzone.density > density_min_giver_zone) \
-                                else gzone.num_of_people
+        # Кол. людей, которые могут покинуть помещение за шаг моделирования
+        part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit)
+        if gzone.density <= min_density_gzone:
+            if part_of_people_flow > gzone.num_of_people:
+                print()
+            part_of_people_flow = gzone.num_of_people
 
         # Т.к. зона вне здания принята безразмерной,
         # в нее может войти максимально возможное количество человек
@@ -273,7 +287,7 @@ if __name__ == '__main__':
         vals = []
         q = []
         for d0 in D:
-            v = round(pfv.speed_through_transit(1, pfv.to_pm2(d0)), 2)
+            v = round(pfv.speed_through_transit(1.6, pfv.to_pm2(d0)), 2)
             vals.append(v)
             q.append(round(v * d0, 1))
 
@@ -354,7 +368,7 @@ if __name__ == '__main__':
         #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}, Density: {z.density}")
 
         time = 0.0
-        for _ in range(1000):
+        for _ in range(10000):
             m.step(bim)
             time += Moving.MODELLING_STEP
             # for z in bim.zones.values():
@@ -368,10 +382,12 @@ if __name__ == '__main__':
             # if nop < 10e-3:
             if nop <= 0:
                 break
+        else:
+            print("# Error! ", end='')
             
             # print("========", nop, bim.safety_zone.num_of_people)
         
-        print(f'Количество человек: {num_of_people} Длительность эвакуации: {time*60:.{4}} с. ({time:.{4}} мин.)')
+        print(f'Количество человек: {num_of_people:.{4}} Длительность эвакуации: {time*60:.{4}} с. ({time:.{4}} мин.)')
         nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
         times.append(round(time*60, 1))
         # print("========", nop, bim.safety_zone.num_of_people)
@@ -385,3 +401,14 @@ if __name__ == '__main__':
         p.append(round(T[i]/times[i], 2))
 
     print(p)
+
+    import matplotlib.pyplot as plt
+    # plot
+    fig, ax = plt.subplots()
+
+    ax.plot(D, T, linewidth=2.0, label='Original')
+    ax.plot(D, times, linewidth=2.0, label='My')
+
+    # Adding legend, which helps us recognize the curve according to it's color
+    plt.legend()
+    plt.show()
