@@ -83,7 +83,7 @@ class Bim:
                           [BPoint(0, 0), BPoint(s, 0), BPoint(s, s), BPoint(0, s), BPoint(0, 0)], 'Safety zone')
         self._safety_zone = Zone(e)
 
-    def set_density(self, value) -> None:
+    def set_density(self, value:float) -> None:
         z: Zone
         for z in filter(lambda x: not (x.id == self.safety_zone.id), self.zones.values()):
             z.density = value
@@ -98,7 +98,7 @@ class Transit(BBuildElement):
         self.num_of_people = 0.0
         self.is_visited = False
         self.is_blocked = False
-        self.is_safe = False
+        self.is_safe = True
     
     @property
     def width(self) -> float:
@@ -191,7 +191,7 @@ class Zone(BBuildElement):
         self.num_of_people = 0.0
         self.is_visited = False
         self.is_blocked = False
-        self.is_safe = False
+        self.is_safe = True
         self.graph_level = 0
         self.density = self.num_of_people/self.area
 
