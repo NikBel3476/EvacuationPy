@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, unique
-from typing import Sequence
-# from collections.abc import Sequence
+from typing import Sequence, List
 from uuid import UUID
 import json
 
@@ -10,6 +9,10 @@ class BPoint:
     x: float
     y: float
     z: float = 0.0
+
+    @staticmethod
+    def from_simple_point(p:List[float]) -> 'BPoint':
+        return BPoint(p[0], p[1])
 
 @unique
 class BSign(Enum):
@@ -54,9 +57,9 @@ def mapping_building(file_buildingjson:str) -> BBuilding:
     with open(file_buildingjson, 'r') as json_file:
         rjson = json.load(json_file)
         
-        _levels = list()
+        _levels:List[BLevel] = list()
         for level in rjson['Level']:
-            _elements = []
+            _elements: List[BBuildElement] = list()
             # reveal_type(_elements)
             for element in level['BuildElement']:
                 _sign = BSign.from_str(element['Sign'])

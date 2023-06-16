@@ -1,6 +1,10 @@
+from dataclasses import dataclass
 from scipy.spatial import Delaunay
-from typing import Sequence, Union
+from typing import Sequence, Union, Tuple, List
 from uuid import UUID
+from typing import NewType, TypedDict
+
+import math
 
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
 
@@ -39,8 +43,7 @@ class Bim:
                 if z_linked.sign == BSign.Staircase and self.zones[t.output[1]].sign == BSign.Staircase:
                     continue
             
-            is_successful = t.calculate_width(z_linked)
-            if not is_successful:
+            if not t.calculate_width(z_linked):
                 incorrect_transits.append((t, z_linked))
 
         if len(incorrect_transits) > 0:
@@ -88,6 +91,30 @@ class Bim:
         for z in filter(lambda x: not (x.id == self.safety_zone.id), self.zones.values()):
             z.density = value
   
+class TransitWidthError(ValueError):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+@dataclass(frozen=True)
+class BLine2D():
+    p0:BPoint
+    p1:BPoint
+
+    def length(self) -> float:
+        return math.sqrt(math.pow(self.p0.x - self.p1.x, 2) + math.pow(self.p0.y - self.p1.y, 2))
+    
+    @staticmethod
+    def bound() -> 'BLine2D':
+        return BLine2D(BPoint(0,0), BPoint(0,0))
+    
+    @staticmethod
+    def from_simple_points(p0:List[float], p1:List[float]) -> 'BLine2D':
+        return BLine2D(BPoint.from_simple_point(p0), BPoint.from_simple_point(p1))
+
+@dataclass(frozen=True)
+class TransitEdges():
+    parallel:Tuple[BLine2D, BLine2D]
+    normal  :Tuple[BLine2D, BLine2D]
 
 class Transit(BBuildElement):
 
@@ -106,11 +133,24 @@ class Transit(BBuildElement):
     
     @width.setter
     def width(self, w: float) -> None:
-        if w <= 0.0:
-            raise ValueError("Width of transit below or equal 0 is not possible")
+        if w <= 0.5:
+            raise TransitWidthError("Width of transit below or equal 0.5 is not possible")
         self._width = w
 
     def calculate_width(self, zone_element:BBuildElement) -> bool:
+        tr_edges:Union[TransitEdges, None] = self.prepare_transit(zone_element)
+        if not (tr_edges is None):
+            self._width = round((tr_edges.parallel[0].length() + tr_edges.parallel[1].length())/2, NDIGITS)
+            return True
+        return False
+    
+    def prepare_transit(self, zone_element:BBuildElement) -> Union[TransitEdges, None]:
+        ''' Сортировка ребер проема на параллельные стенам комнат, которые соединяют и перпендикулярные
+
+            Дальше из длин параллельных ребер вычсиляется ширина двери
+
+            Перепендикулярные ребра используются для вычисления ширины виртуального проема
+        '''
         transit_points = [[p.x, p.y] for p in self.points[:-1]]
         zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
         zone_tri = Delaunay(zone_points)
@@ -119,18 +159,21 @@ class Transit(BBuildElement):
         edge_points.sort(reverse=True)
         
         if not (len(edge_points) == 2):
-            return False
+            return None
         
         p1 = transit_points.pop(edge_points[0])
         p2 = transit_points.pop(edge_points[1])
         p3 = transit_points.pop(1)
         p4 = transit_points.pop(0)
 
-        length = lambda p1, p2: pow((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2, 0.5)
+        parallel = (BLine2D.from_simple_points(p1, p2), BLine2D.from_simple_points(p3, p4))
+        normal = (BLine2D.from_simple_points(p1, p3), BLine2D.from_simple_points(p2, p4))
 
-        self._width = round((length(p1, p2) + length(p3, p4))/2, NDIGITS)
+        if normal[0].length() > BLine2D.from_simple_points(p1, p4).length():
+            normal = (BLine2D.from_simple_points(p1, p4), BLine2D.from_simple_points(p2, p3))
 
-        return True
+        te = TransitEdges(parallel, normal)
+        return te
         
 
     def _point_in_polygon(self, point, zone_tri:Delaunay) -> bool:
@@ -176,6 +219,103 @@ class Transit(BBuildElement):
             return False
         
         return True
+    
+    def _door_way_width(self, zone_element:BBuildElement) -> bool:
+        '''
+        Возможные варианты стыковки помещений, которые соединены проемом
+        Код ниже определяет область их пересечения
+           +----+  +----+     +----+
+                |  |               | +----+
+                |  |               | |
+                |  |               | |
+           +----+  +----+          | |
+                                   | +----+
+           +----+             +----+
+                |  +----+
+                |  |          +----+ +----+
+                |  |               | |
+           +----+  |               | |
+                   +----+          | +----+
+                              +----+
+        *************************************************************************
+        1. Определить грани помещения, которые пересекает короткая сторона проема
+        2. Вычислить среднее проекций граней друг на друга
+        '''
+        tr_edges:Union[TransitEdges, None] = self.prepare_transit(zone_element)
+        if tr_edges is None:
+            return False
+
+        # https://e-maxx.ru/algo/segments_intersection_checking
+        def area_of_triangle(p1:BPoint, p2:BPoint, p3:BPoint) -> float:
+            """signed area of a triangle"""
+            return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)
+
+        def intersect_1(p0_a:float, p0_b:float, p1_a:float, p1_b:float) -> bool:
+            p0_a, p0_b = (p0_b, p0_a) if (p0_a > p0_b) else (p0_a, p0_b)
+            p1_a, p1_b = (p1_b, p1_a) if (p1_a > p1_b) else (p1_a, p1_b)
+            return max(p0_a, p1_a) <= min(p0_b, p1_b)
+        
+        def is_intersect_line(l1:BLine2D, l2:BLine2D) -> bool:
+            '''check if two segments intersect'''
+            return intersect_1(l1.p0.x, l1.p1.x, l2.p0.x, l2.p1.x) \
+                    and intersect_1(l1.p0.y, l1.p1.y, l2.p0.y, l2.p1.y) \
+                    and area_of_triangle(l1.p0, l1.p1, l2.p0) * area_of_triangle(l1.p0, l1.p1, l2.p1) <= 0 \
+                    and area_of_triangle(l2.p0, l2.p1, l1.p0) * area_of_triangle(l2.p0, l2.p1, l1.p1) <= 0 
+
+        def intersected_edge() -> BLine2D:
+            numOfIntersect:int = 0
+            line:BLine2D = BLine2D.bound()
+            for pidx in range(len(zone_element.points[:-1])):
+                pointElementA = zone_element.points[pidx-1]
+                pointElementB = zone_element.points[pidx]
+                line_tmp = BLine2D(pointElementA, pointElementB)
+                isIntersect = is_intersect_line(tr_edges.normal[0], line_tmp)
+                if isIntersect:
+                    line = BLine2D(pointElementA, pointElementB)
+                    numOfIntersect += 1
+                    if numOfIntersect != 1:
+                        raise ValueError("Ошибка геометрии. Проверьте правильность ввода дверей и вирутальных проемов.")
+            
+            return line
+
+        # Определение точки на линии, расстояние до которой от заданной точки является минимальным из существующих
+        def nearest_point(point_start:BPoint, line:BLine2D) -> BPoint:
+            a = BPoint(line.p0.x, line.p0.y)
+            b = BPoint(line.p1.x, line.p1.y)
+
+            if line.length() < 1e-9:
+                raise ValueError("Линия короткая")
+
+            A = point_start.x - a.x
+            B = point_start.y - a.y
+            C = b.x - a.x
+            D = b.y - a.y
+
+            dot = A * C + B * D
+            len_sq = C * C + D * D
+            param = -1
+
+            if len_sq != 0:
+                param = dot / len_sq
+
+            xx:float
+            yy:float
+
+            if param < 0:
+                xx = a.x
+                yy = a.y
+            elif param > 1:
+                xx = b.x
+                yy = b.y
+            else:
+                xx = a.x + param * C
+                yy = a.y + param * D
+
+            point_end = BPoint(xx,yy)
+            return point_end
+
+        return True
+        
     
     def __repr__(self) -> str:
         return f"Transit(name:{self.name})"

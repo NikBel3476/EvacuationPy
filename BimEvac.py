@@ -1,7 +1,9 @@
 from functools import reduce
 from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
+
 import math
+import matplotlib.pyplot as plt
 
 class PeopleFlowVelocity(object):
 
@@ -18,10 +20,10 @@ class PeopleFlowVelocity(object):
         self.projection_area = projection_area
         self.D09 = self.to_pm2(0.9)
     
-    def to_m2m2(self, d) -> float:
+    def to_m2m2(self, d:float) -> float:
         return d * self.projection_area
     
-    def to_pm2(self, D) -> float:
+    def to_pm2(self, D:float) -> float:
         return D/self.projection_area
 
     @staticmethod
@@ -126,6 +128,7 @@ class Moving(object):
     def __init__(self) -> None:
         self.pfv = PeopleFlowVelocity(projection_area=0.1)
         self._step_counter = [0, 0, 0]
+        self.direction_pairs = {}
     
     def step(self, bim:Bim):
         self._step_counter[0] += 1
@@ -136,9 +139,6 @@ class Moving(object):
         receiving_zone: Zone = zones_to_process.pop()
 
         self._step_counter[1] = 0
-
-        if self._step_counter[0] == 24:
-            print(end="")
 
         while True:
             
@@ -158,6 +158,7 @@ class Moving(object):
                 receiving_zone.num_of_people += moved_people
                 giving_zone.num_of_people -= moved_people
                 transit.num_of_people = moved_people
+                self.direction_pairs[transit.id] = [giving_zone, receiving_zone]
 
                 giving_zone.is_visited = True
                 transit.is_visited = True
@@ -276,7 +277,7 @@ if __name__ == '__main__':
         print('-----')
         # print(f'Origin: {Q}')
         # print(f'Rintd : {q}')
-
+ 
         print('#DOORS')
         D1 = [0.5,   0.51,  0.52,  0.53,  0.54,  0.55,  0.56,  0.57,  0.58,  0.59,  0.6]
         V1 = [39.82, 38.25, 37.50, 36.75, 36.04, 35.35, 34.64, 33.96, 33.31, 32.66, 32.02]
@@ -297,6 +298,17 @@ if __name__ == '__main__':
         # print(f'Origin: {Q}')
         # print(f'Rintd : {q}')
 
+        # plot
+        # fig, ax = plt.subplots()
+
+        # ax.plot(D, V, linewidth=2.0, label='Original')
+        # ax.plot(D, vals, linewidth=2.0, label='My')
+
+        # # Adding legend, which helps us recognize the curve according to it's color
+        # plt.legend()
+        # plt.show()
+
+
         print('#STAIRS')
         V = {pfv.STAIR_UP:  [60.00, 60.00, 52.67, 39.99, 32.57, 27.30, 23.22, 19.88, 17.06, 14.62, 12.46, 12.46],
             pfv.STAIR_DOWN: [100.0, 100.00, 95.30, 67.60, 51.40, 39.88, 30.96, 23.67, 17.50, 12.16, 7.44, 7.44]}
@@ -309,7 +321,7 @@ if __name__ == '__main__':
         print(f'Origin: {V[pfv.STAIR_DOWN]} DOWN')
         print(f'Rintd : {vals}')
         print('-----')
-
+  
         vals = []
         for d0 in D:
             v = round(pfv.speed_on_stair(pfv.STAIR_UP, pfv.to_pm2(d0)), 2)
@@ -370,6 +382,7 @@ if __name__ == '__main__':
         time = 0.0
         for _ in range(10000):
             m.step(bim)
+            print(m.direction_pairs)
             time += Moving.MODELLING_STEP
             # for z in bim.zones.values():
             #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
@@ -402,7 +415,6 @@ if __name__ == '__main__':
 
     print(p)
 
-    import matplotlib.pyplot as plt
     # plot
     fig, ax = plt.subplots()
 
