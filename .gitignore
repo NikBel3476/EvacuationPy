@@ -1,4 +1,13 @@
 *
 
-!*py
+!*.py
 !.gitignore
+!pyproject.toml
+
+!.github
+!.github/workflows
+!.github/workflows/tests.yml
+
+!.vscode
+!.vscode/settings.json
+!.vscode/extensions.json
