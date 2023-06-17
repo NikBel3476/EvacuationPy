@@ -1,6 +1,6 @@
 {
 	"recommendations": [
 		"charliermarsh.ruff",
-		"python.autopep8"
+		"ms-python.autopep8"
 	]
 }

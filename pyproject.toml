@@ -5,7 +5,12 @@ description = "Evacuation modeling"
 readme = "README.md"
 requires-python = ">=3.11"
 
-dependencies = ['scipy == 1.10', 'matplotlib == 3.7', 'ruff == 0.0.272']
+dependencies = [
+	'scipy == 1.10',
+	'matplotlib == 3.7',
+	'ruff == 0.0.272',
+	'pytest == 7.3.2'
+]
 
 [tool.ruff]
 target-version = "py311"
