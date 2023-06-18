@@ -20,7 +20,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install .
       - name: Check PEP8
-        run: autopep8 --diff .
+        id: autopep8
+        uses: peter-evans/autopep8@v2
+        with:
+          args: --diff .
+      - name: autopep8 check failed
+        if: steps.autopep8.outputs.exit-code == 2
+        run: exit 1
 #      - uses: chartboost/ruff-action@v1
       - name: Test with pytest
         run: |
