@@ -11,3 +11,5 @@
 !.vscode
 !.vscode/settings.json
 !.vscode/extensions.json
+
+!.pre-commit-config.yaml
