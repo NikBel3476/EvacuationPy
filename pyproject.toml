@@ -21,6 +21,4 @@ line-length = 120
 [tool.autopep8]
 max_line_length = 120
 aggressive = 3
-in-place = true
 recursive = true
-exit-code = true
