@@ -10,8 +10,7 @@ dependencies = [
 	'matplotlib == 3.7',
 	'ruff == 0.0.272',
 	'pytest == 7.3.2',
-	'autopep8 == 2.0.2',
-	'pre-commit == 3.3.3'
+	'autopep8 == 2.0.2'
 ]
 
 [tool.ruff]

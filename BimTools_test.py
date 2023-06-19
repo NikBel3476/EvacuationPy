@@ -5,10 +5,12 @@ from scipy.spatial import Delaunay
 from BimDataModel import BBuildElement, BPoint, BSign
 from BimTools import Zone, BLine2D, Transit
 
+
 class TestBimToolsBLine2D:
     def test_length(self):
         line = BLine2D(BPoint(-1.0, -1.0), BPoint(1.0, 1.0))
         assert line.length() == math.sqrt(8)
+
 
 class TestBimToolsTransit:
     @pytest.mark.parametrize(
