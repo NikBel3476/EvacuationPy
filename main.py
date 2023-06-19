@@ -8,12 +8,12 @@ from BimDataModel import BSign
 building = BimDataModel.mapping_building('resources/example-two-exits.json')
 
 bim = Bim(building)
-BimComplexity(bim) # check a building
+BimComplexity(bim)  # check a building
 
 # Список комнат, не включающий безопасную зону
 wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-density = 1.0 # чел./м2
+density = 1.0  # чел./м2
 bim.set_density(density)
 
 for z in bim.zones.values():
@@ -21,7 +21,7 @@ for z in bim.zones.values():
 
 m = Moving()
 
-time = 0.0 # Длительность эвакуации
+time = 0.0  # Длительность эвакуации
 for _ in range(1000):
     m.step(bim)
     time += Moving.MODELLING_STEP
@@ -35,7 +35,7 @@ for _ in range(1000):
     nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
     if nop < 10e-3:
         break
-    
+
     # print("========", nop, bim.safety_zone.num_of_people)
 
 print(f'Длительность эвакуации: {time*60:.{4}} с. ({time:.{4}} мин.)')
