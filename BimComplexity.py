@@ -1,11 +1,10 @@
 from BimTools import Bim, Transit, Zone
 
-
 class BimComplexity(object):
 
-    def __init__(self, bim: Bim) -> None:
+    def __init__(self, bim:Bim) -> None:
         self.bim = bim
-        self.number_of_zones = len(self.bim.zones) - 1  # вычитаем безопасную зону
+        self.number_of_zones = len(self.bim.zones)-1 #вычитаем безопасную зону
         self.number_of_transits = len(self.bim.transits)
         self.depth_of_bim_graph = 0
         self.width_of_bim_graph = 0
@@ -14,33 +13,33 @@ class BimComplexity(object):
     @property
     def number_of_zones(self) -> int:
         return self._number_of_zones
-
+    
     @number_of_zones.setter
-    def number_of_zones(self, val: int) -> None:
+    def number_of_zones(self, val:int) -> None:
         self._number_of_zones = val
 
     @property
     def number_of_transits(self) -> int:
         return self._number_of_transits
-
+    
     @number_of_transits.setter
-    def number_of_transits(self, val: int) -> None:
+    def number_of_transits(self, val:int) -> None:
         self._number_of_transits = val
 
     @property
     def width_of_bim_graph(self) -> int:
         return self._width_of_bim_graph
-
+    
     @width_of_bim_graph.setter
-    def width_of_bim_graph(self, val: int) -> None:
+    def width_of_bim_graph(self, val:int) -> None:
         self._width_of_bim_graph = val
 
     @property
     def depth_of_bim_graph(self) -> int:
         return self._depth_of_bim_graph
-
+    
     @depth_of_bim_graph.setter
-    def depth_of_bim_graph(self, val: int) -> None:
+    def depth_of_bim_graph(self, val:int) -> None:
         self._depth_of_bim_graph = val
 
     def _calulate(self):
@@ -63,7 +62,7 @@ class BimComplexity(object):
                 giving_zone: Zone = self.bim.zones[transit.output[0]]
                 if giving_zone.id == receiving_zone.id and len(transit.output) > 1:
                     giving_zone = self.bim.zones[transit.output[1]]
-
+                
                 if giving_zone.is_visited:
                     continue
 
@@ -81,9 +80,9 @@ class BimComplexity(object):
 
             if len(zones_to_process) == 0:
                 break
-
+            
             receiving_zone = zones_to_process.pop()
-
+        
         self.width_of_bim_graph = max(graph_level_elemnts)
         self.depth_of_bim_graph = max_graph_level
 
@@ -93,19 +92,14 @@ class BimComplexity(object):
             from types import FrameType
             from typing import Union
             frame: Union[FrameType, None] = inspect.currentframe()
-            print(
-                f">GraphConnectivityException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]: Connectivity on the graph is broken. Zones below is unreachable:")
+            print(f">GraphConnectivityException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]: Connectivity on the graph is broken. Zones below is unreachable:")
             for z in filter(lambda x: not x.is_visited and not (x.name == "Safety zone"), self.bim.zones.values()):
                 print(f"{z.sign.name}({z.id}, {z.name}) on level at {z.points[0].z}")
-
+            
             print(">>QGIS expression for find unreachable zones (use 'Select Features Using Expression'):")
-            print(
-                ' or '.join(
-                    f'id is \'{z.id}\'' for z in filter(
-                        lambda x: not x.is_visited and not (
-                            x.name == "Safety zone"),
-                        self.bim.zones.values())))
+            print(' or '.join(f'id is \'{z.id}\'' for z in filter(lambda x: not x.is_visited and not (x.name == "Safety zone"), self.bim.zones.values())))
             exit()
 
+    
     def __str__(self) -> str:
         return f"N_w = {self.number_of_zones} - Количество помещений\nN_b = {self.number_of_transits} - Количество дверей\nM_w = {self.width_of_bim_graph} - Ширина графа\nL_w = {self.depth_of_bim_graph} - Глубина графа"
