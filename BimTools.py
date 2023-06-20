@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from scipy.spatial import Delaunay
-from typing import Sequence, Union, Tuple, List
+from typing import Sequence, Union, Tuple, List, Any
 from uuid import UUID
 from typing import NewType, TypedDict
-
+import tripy
 import math
-
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
+
+Triangulation = list[tuple[tuple[float, float], tuple[float, float], tuple[float, float]]]
 
 NDIGITS:int = 15
 
@@ -153,7 +154,7 @@ class Transit(BBuildElement):
         '''
         transit_points = [[p.x, p.y] for p in self.points[:-1]]
         zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
-        zone_tri = Delaunay(zone_points)
+        zone_tri: Triangulation = tripy.earclip(zone_points)
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
@@ -176,7 +177,7 @@ class Transit(BBuildElement):
         return te
         
 
-    def _point_in_polygon(self, point, zone_tri:Delaunay) -> bool:
+    def _point_in_polygon(self, point, zone_tri: Triangulation) -> bool:
         '''
         Проверка вхождения точки в прямоугольник
 
@@ -212,8 +213,8 @@ class Transit(BBuildElement):
         '''
         Проверяем в какие треугольники попадает точка
         '''
-        for tr in zone_tri.simplices:
-            if is_point_in_triangle([zone_tri.points[tr[0]], zone_tri.points[tr[1]], zone_tri.points[tr[2]]], point):
+        for tr in zone_tri:
+            if is_point_in_triangle([tr[0], tr[1], tr[2]], point):
                 break
         else: # В это условие попадаем, если прошли цикл
             return False
@@ -343,8 +344,8 @@ class Zone(BBuildElement):
         def triangle_area(p1, p2, p3) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri = Delaunay([[p.x, p.y] for p in self.points[:-1]])
-        self._area = round(sum(triangle_area(self._tri.points[tr[0]], self._tri.points[tr[1]], self._tri.points[tr[2]]) for tr in self._tri.simplices), NDIGITS)
+        self._tri: Triangulation = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
+        self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property
     def num_of_people(self) -> float:
