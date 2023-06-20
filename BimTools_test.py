@@ -1,6 +1,7 @@
 from uuid import UUID
 import math
 import pytest
+import tripy
 from scipy.spatial import Delaunay
 from BimDataModel import BBuildElement, BPoint, BSign
 from BimTools import Zone, BLine2D, Transit
@@ -41,7 +42,7 @@ class TestBimToolsTransit:
             [0.0, 1.0]
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(point, tri)
@@ -73,7 +74,7 @@ class TestBimToolsTransit:
             [0.0, 1.0]
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert not transit._point_in_polygon(point, tri)
@@ -109,7 +110,7 @@ class TestBimToolsTransit:
             [0.0, 1.0]
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(point, tri)
@@ -144,7 +145,7 @@ class TestBimToolsTransit:
             [0.0, 1.0]
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert not transit._point_in_polygon(point, tri)
@@ -190,17 +191,17 @@ class TestBimToolsTransit:
         ]
 
         points_inside = [
-                        [
-                            8.854587660027866,
-                            9.577113505788097,
-                        ],
             [
-                            7.198563041059868,
-                            9.554113163857984,
-                        ],
+                8.854587660027866,
+                9.577113505788097,
+            ],
+            [
+                7.198563041059868,
+                9.554113163857984,
+            ],
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(points_inside[0], tri) and \
@@ -323,7 +324,7 @@ class TestBimToolsTransit:
                         ],
         ]
 
-        tri = Delaunay(polygon)
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(points_inside[0], tri) and \
@@ -478,4 +479,4 @@ class TestBimToolsZone:
 
         zone_triangle = Zone(build_element)
 
-        assert zone_triangle.area == 15.44548203003071
+        assert zone_triangle.area == 15.445482030030712

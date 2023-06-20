@@ -8,6 +8,7 @@ requires-python = ">=3.11"
 dependencies = [
 	'scipy == 1.10',
 	'matplotlib == 3.7',
+	'tripy == 1.0.0',
 	'ruff == 0.0.272',
 	'pytest == 7.3.2',
 	'autopep8 == 2.0.2'
