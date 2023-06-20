@@ -28,6 +28,9 @@ jobs:
 #        if: steps.autopep8.outputs.exit-code == 2
 #        run: exit 1
 #      - uses: chartboost/ruff-action@v1
+      - name: Check types with mypy
+        run: mypy --config-file=pyproject.toml
+      - name: Check types with pyright
+        run: pyright
       - name: Test with pytest
-        run: |
-          pytest
+        run: pytest
