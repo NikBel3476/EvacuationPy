@@ -1,9 +1,9 @@
 [project]
-name = "EvacuationPy"
-version = "0.0.1"
-description = "Evacuation modeling"
-readme = "README.md"
-requires-python = ">=3.11"
+name = 'EvacuationPy'
+version = '0.0.1'
+description = 'Evacuation modeling'
+readme = 'README.md'
+requires-python = '>=3.11'
 
 dependencies = [
 	'scipy == 1.10.1',
@@ -14,10 +14,15 @@ dependencies = [
 	'autopep8 == 2.0.2',
 	'mypy == 1.3.0',
 	'pyright == 1.1.314',
+	'black == 23.3.0',
 ]
 
 [tool.ruff]
-target-version = "py311"
+target-version = 'py311'
+ignore = ['E501']
+
+[tool.black]
+target-version = ['py311']
 line-length = 120
 
 [tool.autopep8]
