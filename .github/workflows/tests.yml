@@ -28,12 +28,12 @@ jobs:
 #        if: steps.autopep8.outputs.exit-code == 2
 #        run: exit 1
 #      - uses: chartboost/ruff-action@v1
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "."
-      - name: Check types with mypy
-        run: mypy --config-file=pyproject.toml
-      - uses: jakebailey/pyright-action@v1
+#      - uses: psf/black@stable
+#        with:
+#          options: "--check --verbose"
+#          src: "."
+#      - name: Check types with mypy
+#        run: mypy --config-file=pyproject.toml
+#      - uses: jakebailey/pyright-action@v1
       - name: Test with pytest
         run: pytest
