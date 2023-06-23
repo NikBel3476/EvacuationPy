@@ -3,4 +3,5 @@
 !*py
 !.gitignore
 
-!/\.vscode/
+!\.vscode/
+!\.vscode/*.json
