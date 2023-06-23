@@ -5,6 +5,9 @@ import tripy
 from BimDataModel import BBuildElement, BPoint, BSign
 from BimTools import Zone, BLine2D, Transit
 
+# TODO: replace List to list when switch to python 3.11
+from typing import List
+
 
 class TestBimToolsBLine2D:
     def test_length(self):
@@ -16,7 +19,7 @@ class TestBimToolsTransit:
     @pytest.mark.parametrize(
         "point", [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0], [0.5, 0.5], [0.0, 1.0], [0.0, 0.5], [0.0, 0.0]]
     )
-    def test_point_inside_triangle(self, point: list[float]):
+    def test_point_inside_triangle(self, point: List[float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -34,7 +37,7 @@ class TestBimToolsTransit:
         assert transit._point_in_polygon(point, tri)
 
     @pytest.mark.parametrize("point", [[-1.0, -1.0], [0.5, -1.0], [1.5, -0.5], [1.0, 1.0], [-0.5, 1.5], [-0.5, 0.5]])
-    def test_point_outside_triangle(self, point: list[float]):
+    def test_point_outside_triangle(self, point: List[float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -65,7 +68,7 @@ class TestBimToolsTransit:
             [0.5, 0.5],
         ],
     )
-    def test_point_inside_square(self, point: list[float]):
+    def test_point_inside_square(self, point: List[float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -85,7 +88,7 @@ class TestBimToolsTransit:
     @pytest.mark.parametrize(
         "point", [[-0.5, -0.5], [0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [1.5, 1.5], [0.5, 1.5], [-0.5, 1.5], [-0.5, 0.5]]
     )
-    def test_point_outside_square(self, point: list[float]):
+    def test_point_outside_square(self, point: List[float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
