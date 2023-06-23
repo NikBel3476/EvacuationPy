@@ -2,3 +2,5 @@
 
 !*py
 !.gitignore
+
+!/\.vscode/
