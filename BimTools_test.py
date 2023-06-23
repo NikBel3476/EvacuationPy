@@ -14,16 +14,7 @@ class TestBimToolsBLine2D:
 
 class TestBimToolsTransit:
     @pytest.mark.parametrize(
-        "point",
-        [
-            [0.0, 0.0],
-            [0.5, 0.0],
-            [1.0, 0.0],
-            [0.5, 0.5],
-            [0.0, 1.0],
-            [0.0, 0.5],
-            [0.0, 0.0]
-        ]
+        "point", [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0], [0.5, 0.5], [0.0, 1.0], [0.0, 0.5], [0.0, 0.0]]
     )
     def test_point_inside_triangle(self, point: list[float]):
         build_element = BBuildElement(
@@ -32,31 +23,17 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
-        polygon = [
-            [0.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 1.0]
-        ]
+        polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(point, tri)
 
-    @pytest.mark.parametrize(
-        "point",
-        [
-            [-1.0, -1.0],
-            [0.5, -1.0],
-            [1.5, -0.5],
-            [1.0, 1.0],
-            [-0.5, 1.5],
-            [-0.5, 0.5]
-        ]
-    )
+    @pytest.mark.parametrize("point", [[-1.0, -1.0], [0.5, -1.0], [1.5, -0.5], [1.0, 1.0], [-0.5, 1.5], [-0.5, 0.5]])
     def test_point_outside_triangle(self, point: list[float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
@@ -64,14 +41,10 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
-        polygon = [
-            [0.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 1.0]
-        ]
+        polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
@@ -90,7 +63,7 @@ class TestBimToolsTransit:
             [0.0, 1.0],
             [0.0, 0.5],
             [0.5, 0.5],
-        ]
+        ],
     )
     def test_point_inside_square(self, point: list[float]):
         build_element = BBuildElement(
@@ -99,15 +72,10 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
-        polygon = [
-            [0.0, 0.0],
-            [1.0, 0.0],
-            [1.0, 1.0],
-            [0.0, 1.0]
-        ]
+        polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
@@ -115,17 +83,7 @@ class TestBimToolsTransit:
         assert transit._point_in_polygon(point, tri)
 
     @pytest.mark.parametrize(
-        "point",
-        [
-            [-0.5, -0.5],
-            [0.5, -0.5],
-            [1.5, -0.5],
-            [1.5, 0.5],
-            [1.5, 1.5],
-            [0.5, 1.5],
-            [-0.5, 1.5],
-            [-0.5, 0.5]
-        ]
+        "point", [[-0.5, -0.5], [0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [1.5, 1.5], [0.5, 1.5], [-0.5, 1.5], [-0.5, 0.5]]
     )
     def test_point_outside_square(self, point: list[float]):
         build_element = BBuildElement(
@@ -134,15 +92,10 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
-        polygon = [
-            [0.0, 0.0],
-            [1.0, 0.0],
-            [1.0, 1.0],
-            [0.0, 1.0]
-        ]
+        polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
@@ -156,7 +109,7 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
         polygon = [
@@ -175,7 +128,7 @@ class TestBimToolsTransit:
             [
                 1.1034724295804352,
                 1.2969904109481103,
-            ]
+            ],
         ]
 
         points_outside = [
@@ -186,7 +139,7 @@ class TestBimToolsTransit:
             [
                 8.877588001957976,
                 10.934133679664647,
-            ]
+            ],
         ]
 
         points_inside = [
@@ -203,10 +156,12 @@ class TestBimToolsTransit:
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
-        assert transit._point_in_polygon(points_inside[0], tri) and \
-            transit._point_in_polygon(points_inside[1], tri) and \
-            not transit._point_in_polygon(points_outside[0], tri) and \
-            not transit._point_in_polygon(points_outside[1], tri)
+        assert (
+            transit._point_in_polygon(points_inside[0], tri)
+            and transit._point_in_polygon(points_inside[1], tri)
+            and not transit._point_in_polygon(points_outside[0], tri)
+            and not transit._point_in_polygon(points_outside[1], tri)
+        )
 
     def test_intersection_of_a_figure_and_a_rectangle(self):
         build_element = BBuildElement(
@@ -215,7 +170,7 @@ class TestBimToolsTransit:
             output=[],
             points=[],
             name="transit",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
         polygon = [
@@ -298,7 +253,7 @@ class TestBimToolsTransit:
             [
                 30.50872802734375,
                 -34.659114837646484,
-            ]
+            ],
         ]
 
         points_outside = [
@@ -309,27 +264,29 @@ class TestBimToolsTransit:
             [
                 31.87872886657715,
                 -37.34701919555664,
-            ]
+            ],
         ]
 
         points_inside = [
-                        [
-                            32.07872772216797,
-                            -38.24702072143555,
-                        ],
             [
-                            32.07872772216797,
-                            -37.34701919555664,
-                        ],
+                32.07872772216797,
+                -38.24702072143555,
+            ],
+            [
+                32.07872772216797,
+                -37.34701919555664,
+            ],
         ]
 
         tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
-        assert transit._point_in_polygon(points_inside[0], tri) and \
-            transit._point_in_polygon(points_inside[1], tri) and \
-            not transit._point_in_polygon(points_outside[0], tri) and \
-            not transit._point_in_polygon(points_outside[1], tri)
+        assert (
+            transit._point_in_polygon(points_inside[0], tri)
+            and transit._point_in_polygon(points_inside[1], tri)
+            and not transit._point_in_polygon(points_outside[0], tri)
+            and not transit._point_in_polygon(points_outside[1], tri)
+        )
 
 
 class TestBimToolsZone:
@@ -337,10 +294,7 @@ class TestBimToolsZone:
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.Room,
-            output=[
-                UUID("00000000-0000-0000-0000-000000000001"),
-                UUID("00000000-0000-0000-0000-000000000002")
-            ],
+            output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
                 BPoint(x=0.0, y=-1.0),
                 BPoint(x=1.0, y=0.0),
@@ -348,7 +302,7 @@ class TestBimToolsZone:
                 BPoint(x=0.0, y=-1.0),
             ],
             name="room for area test",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
         zone_triangle = Zone(build_element)
@@ -359,10 +313,7 @@ class TestBimToolsZone:
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.Room,
-            output=[
-                UUID("00000000-0000-0000-0000-000000000001"),
-                UUID("00000000-0000-0000-0000-000000000002")
-            ],
+            output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
                 BPoint(x=-2.0, y=-1.0),
                 BPoint(x=2.0, y=-1.0),
@@ -371,7 +322,7 @@ class TestBimToolsZone:
                 BPoint(x=-2.0, y=-1.0),
             ],
             name="room for area test",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
         zone_triangle = Zone(build_element)
@@ -382,98 +333,32 @@ class TestBimToolsZone:
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.Room,
-            output=[
-                UUID("00000000-0000-0000-0000-000000000001"),
-                UUID("00000000-0000-0000-0000-000000000002")
-            ],
+            output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
-                BPoint(
-                    x=35.97872543334961,
-                    y=-34.659114837646484
-                ),
-                BPoint(
-                    x=35.97872543334961,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=33.9708251953125,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=33.9708251953125,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=34.07872772216797,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=34.0787277221679,
-                    y=-38.4352912902832
-                ),
-                BPoint(
-                    x=33.15372467041016,
-                    y=-38.4352912902832
-                ),
-                BPoint(
-                    x=33.153724670410156,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=33.25210189819336,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=33.25210189819336,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=32.90689468383789,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=32.90689468383789,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=33.003726959228516,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=33.00372695922856,
-                    y=-38.4352912902832
-                ),
-                BPoint(
-                    x=32.0787277221679,
-                    y=-38.4352912902832
-                ),
-                BPoint(
-                    x=32.07872772216797,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=32.193763732910156,
-                    y=-37.219112396240234
-                ),
-                BPoint(
-                    x=32.19376373291015,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=30.50872802734375,
-                    y=-37.01911163330078
-                ),
-                BPoint(
-                    x=30.50872802734375,
-                    y=-34.659114837646484
-                ),
-                BPoint(
-                    x=35.97872543334961,
-                    y=-34.659114837646484
-                ),
+                BPoint(x=35.97872543334961, y=-34.659114837646484),
+                BPoint(x=35.97872543334961, y=-37.01911163330078),
+                BPoint(x=33.9708251953125, y=-37.01911163330078),
+                BPoint(x=33.9708251953125, y=-37.219112396240234),
+                BPoint(x=34.07872772216797, y=-37.219112396240234),
+                BPoint(x=34.0787277221679, y=-38.4352912902832),
+                BPoint(x=33.15372467041016, y=-38.4352912902832),
+                BPoint(x=33.153724670410156, y=-37.219112396240234),
+                BPoint(x=33.25210189819336, y=-37.219112396240234),
+                BPoint(x=33.25210189819336, y=-37.01911163330078),
+                BPoint(x=32.90689468383789, y=-37.01911163330078),
+                BPoint(x=32.90689468383789, y=-37.219112396240234),
+                BPoint(x=33.003726959228516, y=-37.219112396240234),
+                BPoint(x=33.00372695922856, y=-38.4352912902832),
+                BPoint(x=32.0787277221679, y=-38.4352912902832),
+                BPoint(x=32.07872772216797, y=-37.219112396240234),
+                BPoint(x=32.193763732910156, y=-37.219112396240234),
+                BPoint(x=32.19376373291015, y=-37.01911163330078),
+                BPoint(x=30.50872802734375, y=-37.01911163330078),
+                BPoint(x=30.50872802734375, y=-34.659114837646484),
+                BPoint(x=35.97872543334961, y=-34.659114837646484),
             ],
             name="room for area test",
-            sizeZ=3.0
+            sizeZ=3.0,
         )
 
         zone_triangle = Zone(build_element)
