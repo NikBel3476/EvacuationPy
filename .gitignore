@@ -1,7 +1,16 @@
 *
 
-!*py
+!*.py
 !.gitignore
 
-!\.vscode/
-!\.vscode/*.json
+!pyproject.toml
+
+!.github
+!.github/workflows
+!.github/workflows/tests.yml
+
+!.vscode
+!.vscode/settings.json
+!.vscode/extensions.json
+
+!.pre-commit-config.yaml
