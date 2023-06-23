@@ -241,8 +241,10 @@ class Moving(object):
         capacity_reciving_zone = max_numofpeople - rzone.num_of_people
         # Такая ситуация возникает при плотности в принимающем помещении более Dmax чел./м2
         # Фактически capacity_reciving_zone < 0 означает, что помещение не может принять людей
-        if capacity_reciving_zone < 0: return 0.0
-        else: return part_of_people_flow if (capacity_reciving_zone > part_of_people_flow) else capacity_reciving_zone
+        if capacity_reciving_zone < 0:
+            return 0.0
+        else:
+            return part_of_people_flow if (capacity_reciving_zone > part_of_people_flow) else capacity_reciving_zone
 
     def change_numofpeople(self, gzone:Zone, twidth:float, speed_at_exit:float) -> float:
         # Величина людского потока, через проем шириной twidth, чел./мин
