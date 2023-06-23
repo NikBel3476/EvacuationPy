@@ -1,0 +1,8 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/stubs/**": true,
+        "**/.mypy_cache/**": true,
+    }
+}
