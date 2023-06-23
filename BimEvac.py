@@ -199,13 +199,13 @@ class Moving(object):
         # то скорость будет рассчитываться как по наклонной поверхности
         if abs(dh) > 1e-3 and rzone.sign == BSign.Staircase:
             """Иначе определяем направление движения по лестнице
-                    ______   aGiverItem
-                   /                         => direction = STAIR_UP
-                  /
-            _____/           aReceivingItem
-                 \
-                  \                          => direction = STAIR_DOWN
-                   \______   aGiverItem
+                     ______   aGiverItem
+                   //                         => direction = STAIR_UP
+                  //
+            _____//           aReceivingItem
+                 \\
+                  \\                          => direction = STAIR_DOWN
+                   \\______   aGiverItem
             """
             direction: int = self.pfv.STAIR_DOWN if dh > 0 else self.pfv.STAIR_UP
             v_zone = self.pfv.speed_on_stair(direction, gzone.density)

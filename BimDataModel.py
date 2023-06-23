@@ -25,7 +25,7 @@ class BSign(Enum):
     Staircase = 4
 
     @classmethod
-    def from_str(cls, name: str):
+    def from_str(cls, name: str) -> "BSign":
         return cls[name]
 
 
