@@ -1,5 +1,5 @@
 import BimDataModel
-from BimTools import Bim
+from BimTools import Bim, Zone
 from BimComplexity import BimComplexity
 from BimEvac import Moving
 from BimDataModel import BSign
@@ -16,6 +16,7 @@ wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.va
 density = 1.0 # чел./м2
 bim.set_density(density)
 
+z:Zone
 for z in bim.zones.values():
     print(f"{z}, Количество человек: {z.num_of_people:.{4}}, Плотность: {z.density:.{4}} чел./м2")
 
