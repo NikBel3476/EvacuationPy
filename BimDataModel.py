@@ -49,6 +49,9 @@ class BBuilding:
     name:   str
     addr:   str = ''
 
+class JsonParseError(ValueError):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
 
 def mapping_building(file_buildingjson:str) -> BBuilding:
     building:BBuilding
@@ -72,7 +75,7 @@ def mapping_building(file_buildingjson:str) -> BBuilding:
                                                     output=[UUID(uuid) for uuid in element['Output']],
                                                     points=[BPoint(p['x'], p['y'], level['ZLevel']) for p in element['XY'][0]['points']])
                     _elements.append(build_element)
-                except:
+                except JsonParseError:
                     bad_elements.append((_sign, element['Name'], element['Id'], level['ZLevel']))
 
             _levels.append(BLevel(name=level['NameLevel'], zlevel=level['ZLevel'], elements=_elements))
@@ -84,7 +87,7 @@ def mapping_building(file_buildingjson:str) -> BBuilding:
         from types import FrameType
         from typing import Union
         frame: Union[FrameType, None] = inspect.currentframe()
-        print(f">UnknownException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]. Please check elements from list bellow:")
+        print(f">UnknownException[{__file__}:{frame.f_lineno if frame is not None else ()}]. Please check elements from list bellow:")
         for sign, name, id, level in bad_elements:
             print(f"{sign.name}({id}), name={name}, level={level})")
         print(">>QGIS expression for find bad elements (use 'Select Features Using Expression'):")

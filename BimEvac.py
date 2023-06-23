@@ -133,8 +133,10 @@ class Moving(object):
     
     def step(self, bim:Bim):
         self._step_counter[0] += 1
-        for t in bim.transits.values(): t.is_visited = False
-        for z in bim.zones.values(): z.is_visited = False
+        for t in bim.transits.values():
+            t.is_visited = False
+        for z in bim.zones.values():
+            z.is_visited = False
 
         zones_to_process:Set[Zone] = set([bim.safety_zone])
         receiving_zone: Zone = zones_to_process.pop()
@@ -224,7 +226,7 @@ class Moving(object):
         part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit)
         if gzone.density <= min_density_gzone:
             if part_of_people_flow > gzone.num_of_people:
-                print()
+                print('===WTF!===')
             part_of_people_flow = gzone.num_of_people
 
         # Т.к. зона вне здания принята безразмерной,
@@ -337,8 +339,7 @@ if __name__ == '__main__':
     import BimDataModel
     from BimTools import Bim
     from BimComplexity import BimComplexity
-    from BimEvac import Moving
-
+    
     # building = BimDataModel.mapping_building('resources/example-one-exit.json')
     building = BimDataModel.mapping_building('resources/example-two-exits.json')
     building = BimDataModel.mapping_building(r'/home/boris/Documents/teaching/УдГУ/Рабочие_программы/2022-2023/Прототипирование СБ 1 курс/qgis/Тестовые задачи/test01/test01.2.json')

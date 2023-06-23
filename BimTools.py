@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 # from scipy.spatial import Delaunay
-from typing import Union, Tuple, List, Any
+from typing import Union, Tuple, List
 from uuid import UUID
 from typing import Dict
 import tripy
@@ -23,8 +23,8 @@ class Bim:
         self._num_of_people = 0.0
         self._sz_output:List[UUID] = []
 
-        for l in bim.levels:
-            for e in l.elements:
+        for level in bim.levels:
+            for e in level.elements:
                 element:Union[Zone, Transit]
                 if e.sign == BSign.Room or e.sign == BSign.Staircase:
                     element = Zone(e)
@@ -53,7 +53,7 @@ class Bim:
             import inspect
             from types import FrameType
             frame: Union[FrameType, None] = inspect.currentframe()
-            print(f">TransitGeometryException[{__file__}:{frame.f_lineno if not (frame is None) else ()}]. Please check next transits:")
+            print(f">TransitGeometryException[{__file__}:{frame.f_lineno if frame is not None else ()}]. Please check next transits:")
             for t, z in incorrect_transits:
                 print(f"{t.sign.name}({t.id}), Zone({z.id}, name={z.name})")
                 
@@ -142,7 +142,7 @@ class Transit(BBuildElement):
 
     def calculate_width(self, zone_element:BBuildElement) -> bool:
         tr_edges:Union[TransitEdges, None] = self.prepare_transit(zone_element)
-        if not (tr_edges is None):
+        if tr_edges is not None:
             self._width = round((tr_edges.parallel[0].length() + tr_edges.parallel[1].length())/2, NDIGITS)
             return True
         return False
@@ -197,9 +197,12 @@ class Transit(BBuildElement):
             p - точка 
             '''
             s = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])
-            if s > 0: return 1        # Точка слева от вектора AB
-            elif s < 0: return -1     # Точка справа от вектора AB
-            else: return 0            # Точка на векторе, прямо по вектору или сзади вектора
+            if s > 0: 
+                return 1        # Точка слева от вектора AB
+            elif s < 0: 
+                return -1     # Точка справа от вектора AB
+            else: 
+                return 0            # Точка на векторе, прямо по вектору или сзади вектора
 
         def is_point_in_triangle(triangle:Triangle, p:Point2D) -> bool:
             '''

@@ -2,7 +2,6 @@ from uuid import UUID
 import math
 import pytest
 import tripy
-from scipy.spatial import Delaunay
 from BimDataModel import BBuildElement, BPoint, BSign
 from BimTools import Zone, BLine2D, Transit
 
