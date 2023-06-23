@@ -1,4 +1,5 @@
 from BimTools import Bim, Transit, Zone
+from typing import List
 
 class BimComplexity(object):
 
@@ -46,7 +47,7 @@ class BimComplexity(object):
         zones_to_process = set([self.bim.safety_zone])
         receiving_zone: Zone = zones_to_process.pop()
 
-        graph_level_elemnts = []
+        graph_level_elemnts:List[int] = []
         current_graph_level = 0
         max_graph_level = 0
 

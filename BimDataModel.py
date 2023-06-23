@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, unique
-from typing import Sequence, List
+from typing import Sequence, List, Tuple
 from uuid import UUID
 import json
 
@@ -11,7 +11,7 @@ class BPoint:
     z: float = 0.0
 
     @staticmethod
-    def from_simple_point(p:List[float]) -> 'BPoint':
+    def from_simple_point(p:Tuple[float, float]) -> 'BPoint':
         return BPoint(p[0], p[1])
 
 @unique
@@ -23,7 +23,7 @@ class BSign(Enum):
     Staircase   = 4
 
     @classmethod
-    def from_str(cls, name):
+    def from_str(cls, name:str):
         return cls[name]
 
 @dataclass(frozen=True)
@@ -52,7 +52,7 @@ class BBuilding:
 
 def mapping_building(file_buildingjson:str) -> BBuilding:
     building:BBuilding
-    bad_elements = list()
+    bad_elements:List[Tuple[BSign, str, str, str]] = list()
 
     with open(file_buildingjson, 'r') as json_file:
         rjson = json.load(json_file)
@@ -60,7 +60,6 @@ def mapping_building(file_buildingjson:str) -> BBuilding:
         _levels:List[BLevel] = list()
         for level in rjson['Level']:
             _elements: List[BBuildElement] = list()
-            # reveal_type(_elements)
             for element in level['BuildElement']:
                 _sign = BSign.from_str(element['Sign'])
                 _sizeZ = element['SizeZ'] if not (_sign == BSign.DoorWay) else 0.0

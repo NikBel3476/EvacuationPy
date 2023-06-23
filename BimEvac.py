@@ -1,6 +1,7 @@
-from functools import reduce
 from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
+from uuid import UUID
+from typing import Set, Tuple, Dict, List
 
 import math
 import matplotlib.pyplot as plt
@@ -128,14 +129,14 @@ class Moving(object):
     def __init__(self) -> None:
         self.pfv = PeopleFlowVelocity(projection_area=0.1)
         self._step_counter = [0, 0, 0]
-        self.direction_pairs = {}
+        self.direction_pairs:Dict[UUID, Tuple[Zone, Zone]] = {}
     
     def step(self, bim:Bim):
         self._step_counter[0] += 1
         for t in bim.transits.values(): t.is_visited = False
         for z in bim.zones.values(): z.is_visited = False
 
-        zones_to_process = set([bim.safety_zone])
+        zones_to_process:Set[Zone] = set([bim.safety_zone])
         receiving_zone: Zone = zones_to_process.pop()
 
         self._step_counter[1] = 0
@@ -158,7 +159,7 @@ class Moving(object):
                 receiving_zone.num_of_people += moved_people
                 giving_zone.num_of_people -= moved_people
                 transit.num_of_people = moved_people
-                self.direction_pairs[transit.id] = [giving_zone, receiving_zone]
+                self.direction_pairs[transit.id] = (giving_zone, receiving_zone)
 
                 giving_zone.is_visited = True
                 transit.is_visited = True
@@ -264,8 +265,8 @@ if __name__ == '__main__':
         V = [100, 100, 80.14, 59.69, 47.73, 39.24, 32.66, 27.28, 22.73, 18.79, 15.32, 15.32]
         # Q = [1.0, 5.0, 8.0, 12.0, 14.1, 16.0, 16.5, 16.3, 16.1, 15.2, 13.5, 13.5]
 
-        vals = []
-        q = []
+        vals:List[float] = []
+        q:List[float] = []
         for d0 in D:
             v = round(pfv.speed_in_room(pfv.to_pm2(d0)), 2)
             vals.append(v)
@@ -364,7 +365,7 @@ if __name__ == '__main__':
     D = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] # м2/м2
     T = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0] # сек.
 
-    times = [] # сек.
+    times:List[float] = [] # сек.
     
     for density in D:
         m = Moving()
@@ -409,7 +410,7 @@ if __name__ == '__main__':
     print(T)
     print(times)
 
-    p = []
+    p:List[float] = []
     for i in range(len(T)):
         p.append(round(T[i]/times[i], 2))
 

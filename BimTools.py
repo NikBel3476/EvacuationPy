@@ -1,25 +1,27 @@
 from dataclasses import dataclass
-from scipy.spatial import Delaunay
-from typing import Sequence, Union, Tuple, List, Any
+# from scipy.spatial import Delaunay
+from typing import Union, Tuple, List, Any
 from uuid import UUID
-from typing import NewType, TypedDict
+from typing import Dict
 import tripy
 import math
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
 
-Triangulation = list[tuple[tuple[float, float], tuple[float, float], tuple[float, float]]]
+Point2D = Tuple[float, float]
+Triangle = Tuple[Point2D, Point2D, Point2D]
+Triangulation = List[Triangle]
 
 NDIGITS:int = 15
 
 class Bim:
 
     def __init__(self, bim:BBuilding) -> None:
-        self.zones = {}
-        self.transits = {}
+        self.zones:Dict[UUID, Zone] = {}
+        self.transits:Dict[UUID, Transit] = {}
 
         self._area = 0.0
         self._num_of_people = 0.0
-        self._sz_output = []
+        self._sz_output:List[UUID] = []
 
         for l in bim.levels:
             for e in l.elements:
@@ -35,7 +37,7 @@ class Bim:
                     if len(element.output) == 1:
                         self._sz_output.append(e.id)
 
-        incorrect_transits = []
+        incorrect_transits:List[Tuple[Transit, Zone]] = []
         t: Transit # for typing the variable
         for t in self.transits.values():
             z_linked:Zone = self.zones[t.output[0]]
@@ -109,7 +111,7 @@ class BLine2D():
         return BLine2D(BPoint(0,0), BPoint(0,0))
     
     @staticmethod
-    def from_simple_points(p0:List[float], p1:List[float]) -> 'BLine2D':
+    def from_simple_points(p0:Tuple[float, float], p1:Tuple[float, float]) -> 'BLine2D':
         return BLine2D(BPoint.from_simple_point(p0), BPoint.from_simple_point(p1))
 
 @dataclass(frozen=True)
@@ -152,8 +154,8 @@ class Transit(BBuildElement):
 
             Перепендикулярные ребра используются для вычисления ширины виртуального проема
         '''
-        transit_points = [[p.x, p.y] for p in self.points[:-1]]
-        zone_points = [[p.x, p.y] for p in zone_element.points[:-1]]
+        transit_points = [(p.x, p.y) for p in self.points[:-1]]
+        zone_points = [(p.x, p.y) for p in zone_element.points[:-1]]
         zone_tri: Triangulation = tripy.earclip(zone_points)
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
@@ -177,7 +179,7 @@ class Transit(BBuildElement):
         return te
         
 
-    def _point_in_polygon(self, point, zone_tri: Triangulation) -> bool:
+    def _point_in_polygon(self, point:Point2D, zone_tri: Triangulation) -> bool:
         '''
         Проверка вхождения точки в прямоугольник
 
@@ -187,7 +189,7 @@ class Transit(BBuildElement):
         с какой стороны от стороны треугольника находится точка.
         '''
         
-        def where_point(a, b, p) -> int:
+        def where_point(a:Point2D, b:Point2D, p:Point2D) -> int:
             '''
             Проверка с какой стороны находится точка \n
             a, b, p - точки, представленные массивом [x, y] \n
@@ -199,7 +201,7 @@ class Transit(BBuildElement):
             elif s < 0: return -1     # Точка справа от вектора AB
             else: return 0            # Точка на векторе, прямо по вектору или сзади вектора
 
-        def is_point_in_triangle(triangle:list, p) -> bool:
+        def is_point_in_triangle(triangle:Triangle, p:Point2D) -> bool:
             '''
             Проверка попадания точки в треугольник \n
             triangle - треугольник, представленный массивом [[x, y], [x, y], [x, y]] \n
@@ -214,7 +216,7 @@ class Transit(BBuildElement):
         Проверяем в какие треугольники попадает точка
         '''
         for tr in zone_tri:
-            if is_point_in_triangle([tr[0], tr[1], tr[2]], point):
+            if is_point_in_triangle((tr[0], tr[1], tr[2]), point):
                 break
         else: # В это условие попадаем, если прошли цикл
             return False
@@ -341,7 +343,7 @@ class Zone(BBuildElement):
         return self._area
     
     def _calculate_area(self):
-        def triangle_area(p1, p2, p3) -> float:
+        def triangle_area(p1:Point2D, p2:Point2D, p3:Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
         self._tri: Triangulation = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])

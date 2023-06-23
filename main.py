@@ -3,6 +3,7 @@ from BimTools import Bim, Zone
 from BimComplexity import BimComplexity
 from BimEvac import Moving
 from BimDataModel import BSign
+from typing import List
 
 # building = BimDataModel.mapping_building('resources/example-one-exit.json')
 building = BimDataModel.mapping_building('resources/example-two-exits.json')
@@ -11,7 +12,7 @@ bim = Bim(building)
 BimComplexity(bim) # check a building
 
 # Список комнат, не включающий безопасную зону
-wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
+wo_safety:List[Zone] = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
 density = 1.0 # чел./м2
 bim.set_density(density)
