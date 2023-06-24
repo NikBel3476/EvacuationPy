@@ -5,7 +5,7 @@ from uuid import UUID
 import json
 
 
-@dataclass(frozen=True, slots=True)  # pyright: ignore [reportUntypedClassDecorator, reportGeneralTypeIssues]
+@dataclass(frozen=True)  # pyright: ignore [reportUntypedClassDecorator, reportGeneralTypeIssues]
 class BPoint:
     x: float
     y: float
