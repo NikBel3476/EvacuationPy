@@ -437,10 +437,10 @@ if __name__ == "__main__":
     print(p)
 
     # plot
-    fig, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType]
+    fig, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
 
-    ax.plot(D, T, linewidth=2.0, label="Original")  # pyright: ignore [reportUnknownMemberType]
-    ax.plot(D, times, linewidth=2.0, label="My")  # pyright: ignore [reportUnknownMemberType]
+    ax.plot(D, T, linewidth=2.0, label="Original")  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
+    ax.plot(D, times, linewidth=2.0, label="My")  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
 
     # Adding legend, which helps us recognize the curve according to it's color
     plt.legend()  # pyright: ignore [reportUnknownMemberType]
