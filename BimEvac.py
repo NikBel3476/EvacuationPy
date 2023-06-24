@@ -287,7 +287,7 @@ if __name__ == "__main__":
         D1 = [0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6]
         V1 = [39.82, 38.25, 37.50, 36.75, 36.04, 35.35, 34.64, 33.96, 33.31, 32.66, 32.02]
 
-        V = [100, 100, 87.30, 66.85, 54.87, 46.40, 39.82, 32.02, 26.30, 21.54, 9.44, 9.44]
+        V = [100, 100, 87.30, 66.85, 54.87, 46.40, 39.82, 32.02, 26.30, 21.54, 9.44, 9.44]  # pyright: ignore
         Q = [1.0, 5.0, 8.7, 13.4, 16.5, 18.4, 19.6, 19.05, 18.5, 17.3, 8.5, 8.5]
 
         vals = []
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         # plt.show()
 
         print("#STAIRS")
-        V = {
+        V = {  # pyright: ignore
             pfv.STAIR_UP: [60.00, 60.00, 52.67, 39.99, 32.57, 27.30, 23.22, 19.88, 17.06, 14.62, 12.46, 12.46],
             pfv.STAIR_DOWN: [100.0, 100.00, 95.30, 67.60, 51.40, 39.88, 30.96, 23.67, 17.50, 12.16, 7.44, 7.44],
         }
@@ -345,6 +345,7 @@ if __name__ == "__main__":
 
     # building = BimDataModel.mapping_building('resources/example-one-exit.json')
     building = BimDataModel.mapping_building("resources/example-two-exits.json")
+    # TODO: replace absolute path to relative
     building = BimDataModel.mapping_building(
         r"/home/boris/Documents/teaching/УдГУ/Рабочие_программы/2022-2023/Прототипирование СБ 1 курс/qgis/Тестовые задачи/test01/test01.2.json"
     )
@@ -368,7 +369,7 @@ if __name__ == "__main__":
     #     # if '7e466' in str(z.id) or '02707' in str(z.id):
     #     z.num_of_people = density * z.area
 
-    D = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
+    D = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2 # pyright: ignore
     T = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
     times: List[float] = []  # сек.
@@ -423,11 +424,11 @@ if __name__ == "__main__":
     print(p)
 
     # plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots()  # pyright: ignore
 
-    ax.plot(D, T, linewidth=2.0, label="Original")
-    ax.plot(D, times, linewidth=2.0, label="My")
+    ax.plot(D, T, linewidth=2.0, label="Original")  # pyright: ignore
+    ax.plot(D, times, linewidth=2.0, label="My")  # pyright: ignore
 
     # Adding legend, which helps us recognize the curve according to it's color
-    plt.legend()
-    plt.show()
+    plt.legend()  # pyright: ignore
+    plt.show()  # pyright: ignore

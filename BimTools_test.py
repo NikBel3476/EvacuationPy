@@ -3,7 +3,7 @@ import math
 import pytest
 import tripy
 from BimDataModel import BBuildElement, BPoint, BSign
-from BimTools import Zone, BLine2D, Transit
+from BimTools import Zone, BLine2D, Transit, Triangulation
 
 # TODO: replace List to list when switch to python 3.11
 from typing import List
@@ -31,10 +31,10 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore
         transit = Transit(build_element)
 
-        assert transit._point_in_polygon(point, tri)
+        assert transit._point_in_polygon(point, tri)  # pyright: ignore
 
     @pytest.mark.parametrize("point", [[-1.0, -1.0], [0.5, -1.0], [1.5, -0.5], [1.0, 1.0], [-0.5, 1.5], [-0.5, 0.5]])
     def test_point_outside_triangle(self, point: List[float]):
@@ -49,7 +49,7 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore
         transit = Transit(build_element)
 
         assert not transit._point_in_polygon(point, tri)

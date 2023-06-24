@@ -5,10 +5,7 @@ description = 'Evacuation modeling'
 readme = 'README.md'
 requires-python = '>=3.8'
 
-dependencies = [
-	'scipy == 1.10.1',
-	'tripy == 1.0.0',
-]
+dependencies = ['scipy == 1.10.1', 'tripy == 1.0.0']
 
 [project.optional-dependencies]
 all = [
@@ -17,7 +14,7 @@ all = [
 	'pytest == 7.3.2',
 	'pyright == 1.1.314',
 	'black[d] == 23.3.0',
-	'pre-commit == 3.3.3'
+	'pre-commit == 3.3.3',
 ]
 
 [tool.ruff]
@@ -34,4 +31,5 @@ strict = true
 ignore_missing_imports = true
 
 [tool.pyright]
-strict = ['**/*.py']
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false

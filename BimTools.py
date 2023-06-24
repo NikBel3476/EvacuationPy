@@ -178,7 +178,7 @@ class Transit(BBuildElement):
         """
         transit_points = [(p.x, p.y) for p in self.points[:-1]]
         zone_points = [(p.x, p.y) for p in zone_element.points[:-1]]
-        zone_tri: Triangulation = tripy.earclip(zone_points)
+        zone_tri: Triangulation = tripy.earclip(zone_points)  # pyright: ignore
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
@@ -291,7 +291,7 @@ class Transit(BBuildElement):
                 and area_of_triangle(l2.p0, l2.p1, l1.p0) * area_of_triangle(l2.p0, l2.p1, l1.p1) <= 0
             )
 
-        def intersected_edge() -> BLine2D:
+        def intersected_edge() -> BLine2D:  # pyright: ignore
             numOfIntersect: int = 0
             line: BLine2D = BLine2D.bound()
             for pidx in range(len(zone_element.points[:-1])):
@@ -308,7 +308,7 @@ class Transit(BBuildElement):
             return line
 
         # Определение точки на линии, расстояние до которой от заданной точки является минимальным из существующих
-        def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:
+        def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:  # pyright: ignore
             a = BPoint(line.p0.x, line.p0.y)
             b = BPoint(line.p1.x, line.p1.y)
 
@@ -378,7 +378,7 @@ class Zone(BBuildElement):
         def triangle_area(p1: Point2D, p2: Point2D, p3: Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri: Triangulation = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
+        self._tri: Triangulation = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])  # pyright: ignore
         self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property
@@ -476,14 +476,14 @@ if __name__ == "__main__":
 
     plot_points = np.array([[point[0], point[1]] for point in points])
 
-    triangles = tripy.earclip(points)
+    triangles: Triangulation = tripy.earclip(points)  # pyright: ignore
 
     tri = np.array([[list(triangle[0]), list(triangle[1]), list(triangle[2])] for triangle in triangles])
 
     print(tri)
 
     for triangle in tri:
-        plt.plot(triangle[:, 0], triangle[:, 1], "go-")
+        plt.plot(triangle[:, 0], triangle[:, 1], "go-")  # pyright: ignore
 
-    plt.plot(plot_points[:, 0], plot_points[:, 1], "o")
-    plt.show()
+    plt.plot(plot_points[:, 0], plot_points[:, 1], "o")  # pyright: ignore
+    plt.show()  # pyright: ignore
