@@ -5,7 +5,7 @@ from uuid import UUID
 import json
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class BPoint:
     x: float
     y: float

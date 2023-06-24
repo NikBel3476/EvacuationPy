@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
 # from scipy.spatial import Delaunay
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Dict
 from uuid import UUID
-from typing import Dict
 import tripy
 import math
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building

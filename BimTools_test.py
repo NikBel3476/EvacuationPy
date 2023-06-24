@@ -4,9 +4,7 @@ import pytest
 import tripy
 from BimDataModel import BBuildElement, BPoint, BSign
 from BimTools import Zone, BLine2D, Transit, Triangulation
-
-# TODO: replace List to list when switch to python 3.11
-from typing import List
+from typing import Tuple
 
 
 class TestBimToolsBLine2D:
@@ -17,9 +15,9 @@ class TestBimToolsBLine2D:
 
 class TestBimToolsTransit:
     @pytest.mark.parametrize(
-        "point", [[0.0, 0.0], [0.5, 0.0], [1.0, 0.0], [0.5, 0.5], [0.0, 1.0], [0.0, 0.5], [0.0, 0.0]]
+        "point", [(0.0, 0.0), (0.5, 0.0), (1.0, 0.0), (0.5, 0.5), (0.0, 1.0), (0.0, 0.5), (0.0, 0.0)]
     )
-    def test_point_inside_triangle(self, point: List[float]):
+    def test_point_inside_triangle(self, point: Tuple[float, float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -31,13 +29,13 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
-        assert transit._point_in_polygon(point, tri)  # pyright: ignore
+        assert transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
 
-    @pytest.mark.parametrize("point", [[-1.0, -1.0], [0.5, -1.0], [1.5, -0.5], [1.0, 1.0], [-0.5, 1.5], [-0.5, 0.5]])
-    def test_point_outside_triangle(self, point: List[float]):
+    @pytest.mark.parametrize("point", [(-1.0, -1.0), (0.5, -1.0), (1.5, -0.5), (1.0, 1.0), (-0.5, 1.5), (-0.5, 0.5)])
+    def test_point_outside_triangle(self, point: Tuple[float, float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -49,26 +47,26 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
-        assert not transit._point_in_polygon(point, tri)
+        assert not transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
 
     @pytest.mark.parametrize(
         "point",
         [
-            [0.0, 0.0],
-            [0.5, 0.0],
-            [1.0, 0.0],
-            [1.0, 0.5],
-            [1.0, 1.0],
-            [0.5, 1.0],
-            [0.0, 1.0],
-            [0.0, 0.5],
-            [0.5, 0.5],
+            (0.0, 0.0),
+            (0.5, 0.0),
+            (1.0, 0.0),
+            (1.0, 0.5),
+            (1.0, 1.0),
+            (0.5, 1.0),
+            (0.0, 1.0),
+            (0.0, 0.5),
+            (0.5, 0.5),
         ],
     )
-    def test_point_inside_square(self, point: List[float]):
+    def test_point_inside_square(self, point: Tuple[float, float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -80,15 +78,15 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
-        assert transit._point_in_polygon(point, tri)
+        assert transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
 
     @pytest.mark.parametrize(
-        "point", [[-0.5, -0.5], [0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [1.5, 1.5], [0.5, 1.5], [-0.5, 1.5], [-0.5, 0.5]]
+        "point", [(-0.5, -0.5), (0.5, -0.5), (1.5, -0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5), (-0.5, 1.5), (-0.5, 0.5)]
     )
-    def test_point_outside_square(self, point: List[float]):
+    def test_point_outside_square(self, point: Tuple[float, float]):
         build_element = BBuildElement(
             id=UUID("00000000-0000-0000-0000-000000000000"),
             sign=BSign.DoorWay,
@@ -100,10 +98,10 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
-        assert not transit._point_in_polygon(point, tri)
+        assert not transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
 
     def test_rectangles_intersection(self):
         build_element = BBuildElement(
@@ -135,35 +133,35 @@ class TestBimToolsTransit:
         ]
 
         points_outside = [
-            [
+            (
                 7.198563041059868,
                 10.888132995804426,
-            ],
-            [
+            ),
+            (
                 8.877588001957976,
                 10.934133679664647,
-            ],
+            ),
         ]
 
         points_inside = [
-            [
+            (
                 8.854587660027866,
                 9.577113505788097,
-            ],
-            [
+            ),
+            (
                 7.198563041059868,
                 9.554113163857984,
-            ],
+            ),
         ]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
         assert (
-            transit._point_in_polygon(points_inside[0], tri)
-            and transit._point_in_polygon(points_inside[1], tri)
-            and not transit._point_in_polygon(points_outside[0], tri)
-            and not transit._point_in_polygon(points_outside[1], tri)
+            transit._point_in_polygon(points_inside[0], tri)  # pyright: ignore [reportPrivateUsage]
+            and transit._point_in_polygon(points_inside[1], tri)  # pyright: ignore [reportPrivateUsage]
+            and not transit._point_in_polygon(points_outside[0], tri)  # pyright: ignore [reportPrivateUsage]
+            and not transit._point_in_polygon(points_outside[1], tri)  # pyright: ignore [reportPrivateUsage]
         )
 
     def test_intersection_of_a_figure_and_a_rectangle(self):
@@ -260,35 +258,35 @@ class TestBimToolsTransit:
         ]
 
         points_outside = [
-            [
+            (
                 31.87872886657715,
                 -38.24702072143555,
-            ],
-            [
+            ),
+            (
                 31.87872886657715,
                 -37.34701919555664,
-            ],
+            ),
         ]
 
         points_inside = [
-            [
+            (
                 32.07872772216797,
                 -38.24702072143555,
-            ],
-            [
+            ),
+            (
                 32.07872772216797,
                 -37.34701919555664,
-            ],
+            ),
         ]
 
-        tri = tripy.earclip(polygon)
+        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
         transit = Transit(build_element)
 
         assert (
-            transit._point_in_polygon(points_inside[0], tri)
-            and transit._point_in_polygon(points_inside[1], tri)
-            and not transit._point_in_polygon(points_outside[0], tri)
-            and not transit._point_in_polygon(points_outside[1], tri)
+            transit._point_in_polygon(points_inside[0], tri)  # pyright: ignore [reportPrivateUsage]
+            and transit._point_in_polygon(points_inside[1], tri)  # pyright: ignore [reportPrivateUsage]
+            and not transit._point_in_polygon(points_outside[0], tri)  # pyright: ignore [reportPrivateUsage]
+            and not transit._point_in_polygon(points_outside[1], tri)  # pyright: ignore [reportPrivateUsage]
         )
 
 
