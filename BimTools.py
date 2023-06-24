@@ -95,7 +95,13 @@ class Bim:
             UUID("e6315dac-ad4b-11ed-9732-d36b774c66a1"),
             BSign.Room,
             self._sz_output,
-            [BPoint(0, 0), BPoint(s, 0), BPoint(s, s), BPoint(0, s), BPoint(0, 0)],
+            [
+                BPoint(0, 0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(s, 0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(s, s),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(0, s),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(0, 0),  # pyright: ignore [reportGeneralTypeIssues]
+            ],
             "Safety zone",
         )
         self._safety_zone = Zone(e)
@@ -121,7 +127,7 @@ class BLine2D:
 
     @staticmethod
     def bound() -> "BLine2D":
-        return BLine2D(BPoint(0, 0), BPoint(0, 0))
+        return BLine2D(BPoint(0, 0), BPoint(0, 0))  # pyright: ignore [reportGeneralTypeIssues]
 
     @staticmethod
     def from_simple_points(p0: Tuple[float, float], p1: Tuple[float, float]) -> "BLine2D":
@@ -308,8 +314,8 @@ class Transit(BBuildElement):
 
         # Определение точки на линии, расстояние до которой от заданной точки является минимальным из существующих
         def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:  # pyright: ignore [reportUnusedFunction]
-            a = BPoint(line.p0.x, line.p0.y)
-            b = BPoint(line.p1.x, line.p1.y)
+            a = BPoint(line.p0.x, line.p0.y)  # pyright: ignore [reportGeneralTypeIssues]
+            b = BPoint(line.p1.x, line.p1.y)  # pyright: ignore [reportGeneralTypeIssues]
 
             if line.length() < 1e-9:
                 raise ValueError("Линия короткая")
@@ -339,7 +345,7 @@ class Transit(BBuildElement):
                 xx = a.x + param * C
                 yy = a.y + param * D
 
-            point_end = BPoint(xx, yy)
+            point_end = BPoint(xx, yy)  # pyright: ignore [reportGeneralTypeIssues]
             return point_end
 
         return True

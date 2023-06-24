@@ -31,5 +31,16 @@ strict = true
 ignore_missing_imports = true
 
 [tool.pyright]
+pythonVersion = "3.8"
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
+reportCallInDefaultInitializer = true
+# reportImplicitOverride = true
+reportImplicitStringConcatenation = true
+reportImportCycles = true
+# reportMissingSuperCall = true
+reportPropertyTypeMismatch = true
+reportShadowedImports = true
+# reportUninitializedInstanceVariable = true
+# reportUnnecessaryTypeIgnoreComment = true
+# reportUnusedCallResult = true

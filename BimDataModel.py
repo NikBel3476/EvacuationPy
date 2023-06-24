@@ -5,7 +5,7 @@ from uuid import UUID
 import json
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)  # pyright: ignore [reportUntypedClassDecorator, reportGeneralTypeIssues]
 class BPoint:
     x: float
     y: float
@@ -13,7 +13,7 @@ class BPoint:
 
     @staticmethod
     def from_simple_point(p: Tuple[float, float]) -> "BPoint":
-        return BPoint(p[0], p[1])
+        return BPoint(p[0], p[1])  # pyright: ignore [reportGeneralTypeIssues]
 
 
 @unique
@@ -79,7 +79,10 @@ def mapping_building(file_buildingjson: str) -> BBuilding:
                         name=element["Name"],
                         sizeZ=_sizeZ,
                         output=[UUID(uuid) for uuid in element["Output"]],
-                        points=[BPoint(p["x"], p["y"], level["ZLevel"]) for p in element["XY"][0]["points"]],
+                        points=[
+                            BPoint(p["x"], p["y"], level["ZLevel"])  # pyright: ignore [reportGeneralTypeIssues]
+                            for p in element["XY"][0]["points"]
+                        ],
                     )
                     _elements.append(build_element)
                 except JsonParseError:

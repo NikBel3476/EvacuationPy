@@ -9,7 +9,7 @@ from typing import Tuple
 
 class TestBimToolsBLine2D:
     def test_length(self):
-        line = BLine2D(BPoint(-1.0, -1.0), BPoint(1.0, 1.0))
+        line = BLine2D(BPoint(-1.0, -1.0), BPoint(1.0, 1.0))  # pyright: ignore [reportGeneralTypeIssues]
         assert line.length() == math.sqrt(8)
 
 
@@ -297,10 +297,10 @@ class TestBimToolsZone:
             sign=BSign.Room,
             output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
-                BPoint(x=0.0, y=-1.0),
-                BPoint(x=1.0, y=0.0),
-                BPoint(x=0.0, y=1.0),
-                BPoint(x=0.0, y=-1.0),
+                BPoint(x=0.0, y=-1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=1.0, y=0.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=0.0, y=1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=0.0, y=-1.0),  # pyright: ignore [reportGeneralTypeIssues]
             ],
             name="room for area test",
             sizeZ=3.0,
@@ -316,11 +316,11 @@ class TestBimToolsZone:
             sign=BSign.Room,
             output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
-                BPoint(x=-2.0, y=-1.0),
-                BPoint(x=2.0, y=-1.0),
-                BPoint(x=3.0, y=1.0),
-                BPoint(x=-1.0, y=1.0),
-                BPoint(x=-2.0, y=-1.0),
+                BPoint(x=-2.0, y=-1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=2.0, y=-1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=3.0, y=1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=-1.0, y=1.0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=-2.0, y=-1.0),  # pyright: ignore [reportGeneralTypeIssues]
             ],
             name="room for area test",
             sizeZ=3.0,
@@ -336,27 +336,27 @@ class TestBimToolsZone:
             sign=BSign.Room,
             output=[UUID("00000000-0000-0000-0000-000000000001"), UUID("00000000-0000-0000-0000-000000000002")],
             points=[
-                BPoint(x=35.97872543334961, y=-34.659114837646484),
-                BPoint(x=35.97872543334961, y=-37.01911163330078),
-                BPoint(x=33.9708251953125, y=-37.01911163330078),
-                BPoint(x=33.9708251953125, y=-37.219112396240234),
-                BPoint(x=34.07872772216797, y=-37.219112396240234),
-                BPoint(x=34.0787277221679, y=-38.4352912902832),
-                BPoint(x=33.15372467041016, y=-38.4352912902832),
-                BPoint(x=33.153724670410156, y=-37.219112396240234),
-                BPoint(x=33.25210189819336, y=-37.219112396240234),
-                BPoint(x=33.25210189819336, y=-37.01911163330078),
-                BPoint(x=32.90689468383789, y=-37.01911163330078),
-                BPoint(x=32.90689468383789, y=-37.219112396240234),
-                BPoint(x=33.003726959228516, y=-37.219112396240234),
-                BPoint(x=33.00372695922856, y=-38.4352912902832),
-                BPoint(x=32.0787277221679, y=-38.4352912902832),
-                BPoint(x=32.07872772216797, y=-37.219112396240234),
-                BPoint(x=32.193763732910156, y=-37.219112396240234),
-                BPoint(x=32.19376373291015, y=-37.01911163330078),
-                BPoint(x=30.50872802734375, y=-37.01911163330078),
-                BPoint(x=30.50872802734375, y=-34.659114837646484),
-                BPoint(x=35.97872543334961, y=-34.659114837646484),
+                BPoint(x=35.97872543334961, y=-34.659114837646484),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=35.97872543334961, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.9708251953125, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.9708251953125, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=34.07872772216797, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=34.0787277221679, y=-38.4352912902832),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.15372467041016, y=-38.4352912902832),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.153724670410156, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.25210189819336, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.25210189819336, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.90689468383789, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.90689468383789, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.003726959228516, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=33.00372695922856, y=-38.4352912902832),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.0787277221679, y=-38.4352912902832),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.07872772216797, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.193763732910156, y=-37.219112396240234),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=32.19376373291015, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=30.50872802734375, y=-37.01911163330078),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=30.50872802734375, y=-34.659114837646484),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(x=35.97872543334961, y=-34.659114837646484),  # pyright: ignore [reportGeneralTypeIssues]
             ],
             name="room for area test",
             sizeZ=3.0,
