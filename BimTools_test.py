@@ -3,7 +3,7 @@ import math
 import pytest
 import tripy
 from BimDataModel import BBuildElement, BPoint, BSign
-from BimTools import Zone, BLine2D, Transit, Triangulation
+from BimTools import Zone, BLine2D, Transit
 from typing import Tuple
 
 
@@ -29,7 +29,7 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
@@ -47,7 +47,7 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert not transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
@@ -78,7 +78,7 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
@@ -98,7 +98,7 @@ class TestBimToolsTransit:
 
         polygon = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert not transit._point_in_polygon(point, tri)  # pyright: ignore [reportPrivateUsage]
@@ -154,7 +154,7 @@ class TestBimToolsTransit:
             ),
         ]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert (
@@ -279,7 +279,7 @@ class TestBimToolsTransit:
             ),
         ]
 
-        tri: Triangulation = tripy.earclip(polygon)  # pyright: ignore [reportUnknownMemberType]
+        tri = tripy.earclip(polygon)
         transit = Transit(build_element)
 
         assert (

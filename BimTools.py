@@ -183,7 +183,7 @@ class Transit(BBuildElement):
         """
         transit_points = [(p.x, p.y) for p in self.points[:-1]]
         zone_points = [(p.x, p.y) for p in zone_element.points[:-1]]
-        zone_tri: Triangulation = tripy.earclip(zone_points)  # pyright: ignore [reportUnknownMemberType]
+        zone_tri = tripy.earclip(zone_points)
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
@@ -383,9 +383,7 @@ class Zone(BBuildElement):
         def triangle_area(p1: Point2D, p2: Point2D, p3: Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri: Triangulation = tripy.earclip(  # pyright: ignore [reportUnknownMemberType]
-            [(p.x, p.y) for p in self.points[:-1]]
-        )
+        self._tri = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
         self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property
@@ -483,7 +481,7 @@ if __name__ == "__main__":
 
     plot_points = np.array([[point[0], point[1]] for point in points])
 
-    triangles: Triangulation = tripy.earclip(points)  # pyright: ignore [reportUnknownMemberType]
+    triangles = tripy.earclip(points)
 
     tri = np.array([[list(triangle[0]), list(triangle[1]), list(triangle[2])] for triangle in triangles])
 
