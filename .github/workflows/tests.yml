@@ -2,16 +2,13 @@ name: Run tests
 
 on: [push, pull_request]
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ["3.8", "3.11"]
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v3
