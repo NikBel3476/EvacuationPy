@@ -5,17 +5,16 @@ description = 'Evacuation modeling'
 readme = 'README.md'
 requires-python = '>=3.8'
 
-dependencies = [
-	'scipy == 1.10.1',
+dependencies = ['scipy == 1.10.1', 'tripy@git+https://github.com/NikBel3476/tripy']
+
+[project.optional-dependencies]
+all = [
 	'matplotlib == 3.7.1',
-	'tripy == 1.0.0',
 	'ruff == 0.0.272',
 	'pytest == 7.3.2',
-	'autopep8 == 2.0.2',
-	'mypy == 1.3.0',
-	'pyright == 1.1.314',
+	'pyright == 1.1.315',
 	'black[d] == 23.3.0',
-	'pre-commit == 3.3.3'
+	'pre-commit == 3.3.3',
 ]
 
 [tool.ruff]
@@ -32,4 +31,16 @@ strict = true
 ignore_missing_imports = true
 
 [tool.pyright]
-strict = ['**/*.py']
+pythonVersion = "3.8"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+reportCallInDefaultInitializer = true
+# reportImplicitOverride = true
+reportImplicitStringConcatenation = true
+reportImportCycles = true
+# reportMissingSuperCall = true
+reportPropertyTypeMismatch = true
+reportShadowedImports = true
+# reportUninitializedInstanceVariable = true
+# reportUnnecessaryTypeIgnoreComment = true
+# reportUnusedCallResult = true

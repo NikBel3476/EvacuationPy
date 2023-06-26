@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
 # from scipy.spatial import Delaunay
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Dict
 from uuid import UUID
-from typing import Dict
 import tripy
 import math
 from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_building
@@ -96,7 +95,13 @@ class Bim:
             UUID("e6315dac-ad4b-11ed-9732-d36b774c66a1"),
             BSign.Room,
             self._sz_output,
-            [BPoint(0, 0), BPoint(s, 0), BPoint(s, s), BPoint(0, s), BPoint(0, 0)],
+            [
+                BPoint(0, 0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(s, 0),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(s, s),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(0, s),  # pyright: ignore [reportGeneralTypeIssues]
+                BPoint(0, 0),  # pyright: ignore [reportGeneralTypeIssues]
+            ],
             "Safety zone",
         )
         self._safety_zone = Zone(e)
@@ -122,7 +127,7 @@ class BLine2D:
 
     @staticmethod
     def bound() -> "BLine2D":
-        return BLine2D(BPoint(0, 0), BPoint(0, 0))
+        return BLine2D(BPoint(0, 0), BPoint(0, 0))  # pyright: ignore [reportGeneralTypeIssues]
 
     @staticmethod
     def from_simple_points(p0: Tuple[float, float], p1: Tuple[float, float]) -> "BLine2D":
@@ -178,7 +183,7 @@ class Transit(BBuildElement):
         """
         transit_points = [(p.x, p.y) for p in self.points[:-1]]
         zone_points = [(p.x, p.y) for p in zone_element.points[:-1]]
-        zone_tri: Triangulation = tripy.earclip(zone_points)
+        zone_tri = tripy.earclip(zone_points)
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
@@ -291,7 +296,7 @@ class Transit(BBuildElement):
                 and area_of_triangle(l2.p0, l2.p1, l1.p0) * area_of_triangle(l2.p0, l2.p1, l1.p1) <= 0
             )
 
-        def intersected_edge() -> BLine2D:
+        def intersected_edge() -> BLine2D:  # pyright: ignore [reportUnusedFunction]
             numOfIntersect: int = 0
             line: BLine2D = BLine2D.bound()
             for pidx in range(len(zone_element.points[:-1])):
@@ -308,9 +313,9 @@ class Transit(BBuildElement):
             return line
 
         # Определение точки на линии, расстояние до которой от заданной точки является минимальным из существующих
-        def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:
-            a = BPoint(line.p0.x, line.p0.y)
-            b = BPoint(line.p1.x, line.p1.y)
+        def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:  # pyright: ignore [reportUnusedFunction]
+            a = BPoint(line.p0.x, line.p0.y)  # pyright: ignore [reportGeneralTypeIssues]
+            b = BPoint(line.p1.x, line.p1.y)  # pyright: ignore [reportGeneralTypeIssues]
 
             if line.length() < 1e-9:
                 raise ValueError("Линия короткая")
@@ -340,7 +345,7 @@ class Transit(BBuildElement):
                 xx = a.x + param * C
                 yy = a.y + param * D
 
-            point_end = BPoint(xx, yy)
+            point_end = BPoint(xx, yy)  # pyright: ignore [reportGeneralTypeIssues]
             return point_end
 
         return True
@@ -378,7 +383,7 @@ class Zone(BBuildElement):
         def triangle_area(p1: Point2D, p2: Point2D, p3: Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri: Triangulation = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
+        self._tri = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
         self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property
@@ -483,7 +488,7 @@ if __name__ == "__main__":
     print(tri)
 
     for triangle in tri:
-        plt.plot(triangle[:, 0], triangle[:, 1], "go-")
+        plt.plot(triangle[:, 0], triangle[:, 1], "go-")  # pyright: ignore [reportUnknownMemberType]
 
-    plt.plot(plot_points[:, 0], plot_points[:, 1], "o")
-    plt.show()
+    plt.plot(plot_points[:, 0], plot_points[:, 1], "o")  # pyright: ignore [reportUnknownMemberType]
+    plt.show()  # pyright: ignore [reportUnknownMemberType]
