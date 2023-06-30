@@ -1,6 +1,9 @@
 {
     "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
     "files.watcherExclude": {
         "**/.git/**": true,
         "**/stubs/**": true,
