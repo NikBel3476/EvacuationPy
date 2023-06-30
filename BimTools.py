@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-# from scipy.spatial import Delaunay
 from typing import Union, Tuple, List, Dict
 from uuid import UUID
 import tripy
@@ -9,7 +8,7 @@ from BimDataModel import BBuilding, BBuildElement, BPoint, BSign, mapping_buildi
 
 Point2D = Tuple[float, float]
 Triangle = Tuple[Point2D, Point2D, Point2D]
-Triangulation = List[Triangle]
+Triangles = List[Triangle]
 
 NDIGITS: int = 15
 
@@ -46,7 +45,7 @@ class Bim:
                 if z_linked.sign == BSign.Staircase and self.zones[t.output[1]].sign == BSign.Staircase:
                     continue
 
-            if not t.calculate_width(z_linked):
+            if not t.calculate_width(z_linked, self.zones[t.output[1]] if len(t.output) > 1 else None):
                 incorrect_transits.append((t, z_linked))
 
         if len(incorrect_transits) > 0:
@@ -126,7 +125,7 @@ class BLine2D:
         return math.sqrt(math.pow(self.p0.x - self.p1.x, 2) + math.pow(self.p0.y - self.p1.y, 2))
 
     @staticmethod
-    def bound() -> "BLine2D":
+    def new() -> "BLine2D":
         return BLine2D(BPoint(0, 0), BPoint(0, 0))  # pyright: ignore [reportGeneralTypeIssues]
 
     @staticmethod
@@ -141,6 +140,8 @@ class TransitEdges:
 
 
 class Transit(BBuildElement):
+    MIN_WIDTH = 0.5
+
     def __init__(self, build_element: BBuildElement) -> None:
         super().__init__(
             build_element.id,
@@ -163,27 +164,49 @@ class Transit(BBuildElement):
 
     @width.setter
     def width(self, w: float) -> None:
-        if w <= 0.5:
+        if w <= self.MIN_WIDTH:
             raise TransitWidthError("Width of transit below or equal 0.5 is not possible")
         self._width = w
 
-    def calculate_width(self, zone_element: BBuildElement) -> bool:
-        tr_edges: Union[TransitEdges, None] = self.prepare_transit(zone_element)
+    def calculate_width(self, zone_element1: BBuildElement, zone_element2: Union[BBuildElement, None]) -> bool:
+        tr_edges: Union[TransitEdges, None] = self.prepare_transit(zone_element1)
         if tr_edges is not None:
-            self._width = round((tr_edges.parallel[0].length() + tr_edges.parallel[1].length()) / 2, NDIGITS)
+            if self.sign is BSign.DoorWay:
+                if zone_element2 is not None:
+                    self._width = self._door_way_width(zone_element1, zone_element2)
+                else:
+                    return False
+            else:
+                self._width = round((tr_edges.parallel[0].length() + tr_edges.parallel[1].length()) / 2, NDIGITS)
             return True
         return False
 
     def prepare_transit(self, zone_element: BBuildElement) -> Union[TransitEdges, None]:
         """Сортировка ребер проема на параллельные стенам комнат, которые соединяют и перпендикулярные
 
-        Дальше из длин параллельных ребер вычсиляется ширина двери
+        ┌─────────┐ ┌──────────┐
+        │         │ │          │
+        │      A┌─┼─┼─┐B       │
+        │       │ │ │ │        │
+        │       │ │ │ │        │
+        │      D└─┼─┼─┘C       │
+        │         │ │          │
+        └─────────┘ └──────────┘
+
+        AD, BC - parallel
+        AB, CD - normal
+
+        Параллельные ребера для вычсиления ширины двери
 
         Перепендикулярные ребра используются для вычисления ширины виртуального проема
         """
-        transit_points = [(p.x, p.y) for p in self.points[:-1]]
-        zone_points = [(p.x, p.y) for p in zone_element.points[:-1]]
-        zone_tri = tripy.earclip(zone_points)
+
+        def _repack_points(points: List[BPoint]) -> List[Point2D]:
+            return list(map(lambda p: (p.x, p.y), points[:-1]))
+
+        transit_points = _repack_points(self.points)
+        zone_points = _repack_points(zone_element.points)
+        zone_tri: Triangles = tripy.earclip(zone_points)
 
         edge_points = [i for i, p in enumerate(transit_points) if self._point_in_polygon(p, zone_tri)]
         edge_points.sort(reverse=True)
@@ -205,7 +228,7 @@ class Transit(BBuildElement):
         te = TransitEdges(parallel, normal)
         return te
 
-    def _point_in_polygon(self, point: Point2D, zone_tri: Triangulation) -> bool:
+    def _point_in_polygon(self, point: Point2D, zone_tri: Triangles) -> bool:
         """
         Проверка вхождения точки в прямоугольник
 
@@ -252,7 +275,7 @@ class Transit(BBuildElement):
 
         return True
 
-    def _door_way_width(self, zone_element: BBuildElement) -> bool:
+    def _door_way_width(self, zone_element1: BBuildElement, zone_element2: BBuildElement) -> float:
         """
         Возможные варианты стыковки помещений, которые соединены проемом
         Код ниже определяет область их пересечения
@@ -273,7 +296,7 @@ class Transit(BBuildElement):
         1. Определить грани помещения, которые пересекает короткая сторона проема
         2. Вычислить среднее проекций граней друг на друга
         """
-        tr_edges: Union[TransitEdges, None] = self.prepare_transit(zone_element)
+        tr_edges: Union[TransitEdges, None] = self.prepare_transit(zone_element1)
         if tr_edges is None:
             return False
 
@@ -296,28 +319,31 @@ class Transit(BBuildElement):
                 and area_of_triangle(l2.p0, l2.p1, l1.p0) * area_of_triangle(l2.p0, l2.p1, l1.p1) <= 0
             )
 
-        def intersected_edge() -> BLine2D:  # pyright: ignore [reportUnusedFunction]
-            numOfIntersect: int = 0
-            line: BLine2D = BLine2D.bound()
-            for pidx in range(len(zone_element.points[:-1])):
-                pointElementA = zone_element.points[pidx - 1]
-                pointElementB = zone_element.points[pidx]
-                line_tmp = BLine2D(pointElementA, pointElementB)
-                isIntersect = is_intersect_line(tr_edges.normal[0], line_tmp)
-                if isIntersect:
-                    line = BLine2D(pointElementA, pointElementB)
-                    numOfIntersect += 1
-                    if numOfIntersect != 1:
-                        raise ValueError("Ошибка геометрии. Проверьте правильность ввода дверей и вирутальных проемов.")
+        def intersected_edge(
+            polygon: List[BPoint], tline: BLine2D
+        ) -> BLine2D:  # pyright: ignore [reportUnusedFunction]
+            """ """
+            lines: List[Union[BLine2D, None]] = list(
+                filter(
+                    lambda edge: edge is not None,
+                    map(
+                        lambda p: BLine2D(p[0], p[1]) if is_intersect_line(tline, BLine2D(p[0], p[1])) else None,
+                        zip(polygon, polygon[1:] + polygon[:1]),
+                    ),
+                )
+            )
 
-            return line
+            if len(lines) > 1 or lines[0] is None:
+                raise ValueError("Ошибка геометрии. Проверьте правильность ввода дверей и вирутальных проемов.")
+
+            return lines[0]
 
         # Определение точки на линии, расстояние до которой от заданной точки является минимальным из существующих
         def nearest_point(point_start: BPoint, line: BLine2D) -> BPoint:  # pyright: ignore [reportUnusedFunction]
-            a = BPoint(line.p0.x, line.p0.y)  # pyright: ignore [reportGeneralTypeIssues]
-            b = BPoint(line.p1.x, line.p1.y)  # pyright: ignore [reportGeneralTypeIssues]
+            a: BPoint = line.p0  # pyright: ignore [reportGeneralTypeIssues]
+            b: BPoint = line.p1  # pyright: ignore [reportGeneralTypeIssues]
 
-            if line.length() < 1e-9:
+            if line.length() < self.MIN_WIDTH:
                 raise ValueError("Линия короткая")
 
             A = point_start.x - a.x
@@ -332,8 +358,8 @@ class Transit(BBuildElement):
             if len_sq != 0:
                 param = dot / len_sq
 
-            xx: float
-            yy: float
+            xx: float = 0
+            yy: float = 0
 
             if param < 0:
                 xx = a.x
@@ -345,10 +371,19 @@ class Transit(BBuildElement):
                 xx = a.x + param * C
                 yy = a.y + param * D
 
-            point_end = BPoint(xx, yy)  # pyright: ignore [reportGeneralTypeIssues]
-            return point_end
+            return BPoint(xx, yy)  # pyright: ignore [reportGeneralTypeIssues]
 
-        return True
+        zone_edge1 = intersected_edge(zone_element1.points, tr_edges.normal[0])
+        zone_edge2 = intersected_edge(zone_element2.points, tr_edges.normal[1])
+
+        projection_line_1to2 = BLine2D(
+            nearest_point(zone_edge1.p0, zone_edge2), nearest_point(zone_edge1.p1, zone_edge2)
+        )
+        projection_line_2to1 = BLine2D(
+            nearest_point(zone_edge2.p0, zone_edge1), nearest_point(zone_edge2.p1, zone_edge1)
+        )
+
+        return (projection_line_1to2.length() + projection_line_2to1.length()) / 2
 
     def __repr__(self) -> str:
         return f"Transit(name:{self.name})"
@@ -383,7 +418,7 @@ class Zone(BBuildElement):
         def triangle_area(p1: Point2D, p2: Point2D, p3: Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
+        self._tri: Triangles = tripy.earclip(((p.x, p.y) for p in self.points[:-1]))
         self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property

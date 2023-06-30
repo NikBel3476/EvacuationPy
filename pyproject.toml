@@ -44,3 +44,6 @@ reportShadowedImports = true
 # reportUninitializedInstanceVariable = true
 # reportUnnecessaryTypeIgnoreComment = true
 # reportUnusedCallResult = true
+
+# [tool.setuptools]
+# py-modules = []
