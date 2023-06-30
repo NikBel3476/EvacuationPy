@@ -4,7 +4,6 @@ from uuid import UUID
 from typing import Set, Tuple, Dict, List
 
 import math
-import matplotlib.pyplot as plt
 
 
 class PeopleFlowVelocity(object):
@@ -255,6 +254,8 @@ class Moving(object):
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
     # print(PeopleFlowVelocity.velocity(1,1,1,1))
     debug = False
     if debug:
