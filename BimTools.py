@@ -418,7 +418,7 @@ class Zone(BBuildElement):
         def triangle_area(p1: Point2D, p2: Point2D, p3: Point2D) -> float:
             return abs(0.5 * ((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1])))
 
-        self._tri: Triangles = tripy.earclip(((p.x, p.y) for p in self.points[:-1]))
+        self._tri: Triangles = tripy.earclip([(p.x, p.y) for p in self.points[:-1]])
         self._area = round(sum(triangle_area(tr[0], tr[1], tr[2]) for tr in self._tri), NDIGITS)
 
     @property
