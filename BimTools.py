@@ -37,7 +37,6 @@ class Bim:
                         self._sz_output.append(e.id)
 
         incorrect_transits: List[Tuple[Transit, Zone]] = []
-        t: Transit  # for typing the variable
         for t in self.transits.values():
             z_linked: Zone = self.zones[t.output[0]]
             # TODO Calculate the width for transits of type DoorWay
@@ -182,8 +181,9 @@ class Transit(BBuildElement):
         return False
 
     def prepare_transit(self, zone_element: BBuildElement) -> Union[TransitEdges, None]:
-        """Сортировка ребер проема на параллельные стенам комнат, которые соединяют и перпендикулярные
+        """Сортировка ребер проема на параллельные и перпендикулярные стенам комнат
 
+        ```
         ┌─────────┐ ┌──────────┐
         │         │ │          │
         │      A┌─┼─┼─┐B       │
@@ -192,6 +192,7 @@ class Transit(BBuildElement):
         │      D└─┼─┼─┘C       │
         │         │ │          │
         └─────────┘ └──────────┘
+        ```
 
         AD, BC - parallel
         AB, CD - normal

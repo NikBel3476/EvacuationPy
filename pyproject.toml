@@ -5,14 +5,17 @@ description = 'Evacuation modeling'
 readme = 'README.md'
 requires-python = '>=3.8'
 
-dependencies = ['scipy == 1.10.1', 'tripy@git+https://github.com/NikBel3476/tripy']
+dependencies = [
+	'scipy == 1.10.1',
+	'tripy@git+https://github.com/NikBel3476/tripy',
+]
 
 [project.optional-dependencies]
 all = [
 	'matplotlib == 3.7.1',
 	'ruff == 0.0.272',
 	'pytest == 7.3.2',
-	'pyright == 1.1.315',
+	'pyright == 1.1.316',
 	'black[d] == 23.3.0',
 	'pre-commit == 3.3.3',
 ]
