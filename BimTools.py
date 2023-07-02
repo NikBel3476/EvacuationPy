@@ -164,7 +164,7 @@ class Transit(BBuildElement):
     @width.setter
     def width(self, w: float) -> None:
         if w <= self.MIN_WIDTH:
-            raise TransitWidthError("Width of transit below or equal 0.5 is not possible")
+            raise TransitWidthError(f"Width of transit below or equal {self.MIN_WIDTH} is not possible")
         self._width = w
 
     def calculate_width(self, zone_element1: BBuildElement, zone_element2: Union[BBuildElement, None]) -> bool:
@@ -280,6 +280,7 @@ class Transit(BBuildElement):
         """
         Возможные варианты стыковки помещений, которые соединены проемом
         Код ниже определяет область их пересечения
+        ```
            +----+  +----+     +----+
                 |  |               | +----+
                 |  |               | |
@@ -293,6 +294,7 @@ class Transit(BBuildElement):
            +----+  |               | |
                    +----+          | +----+
                               +----+
+        ```
         *************************************************************************
         1. Определить грани помещения, которые пересекает короткая сторона проема
         2. Вычислить среднее проекций граней друг на друга

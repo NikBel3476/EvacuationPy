@@ -140,11 +140,10 @@ class Moving(object):
             z.is_visited = False
 
         zones_to_process: Set[Zone] = set([bim.safety_zone])
-        receiving_zone: Zone = zones_to_process.pop()
-
         self._step_counter[1] = 0
 
-        while True:
+        while len(zones_to_process) > 0:
+            receiving_zone = zones_to_process.pop()
             self._step_counter[2] = 0
             transit: Transit
             for transit in (bim.transits[tid] for tid in receiving_zone.output):
@@ -170,11 +169,6 @@ class Moving(object):
                     zones_to_process.add(giving_zone)
 
                 self._step_counter[2] += 1
-
-            if len(zones_to_process) == 0:
-                break
-
-            receiving_zone = zones_to_process.pop()
 
             self._step_counter[1] += 1
 
