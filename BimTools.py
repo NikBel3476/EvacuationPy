@@ -474,7 +474,8 @@ if __name__ == "__main__":
 
     print(z1)
     print(t1)
-    t1.calculate_width(be1)
+    # FIXME: add second zone
+    # t1.calculate_width(be1)
     print(t1.width)
 
     # Test Bim
