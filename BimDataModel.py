@@ -33,8 +33,8 @@ class BSign(Enum):
 class BBuildElement:
     id: UUID
     sign: BSign
-    output: Sequence[UUID]
-    points: Sequence[BPoint]
+    output: List[UUID]
+    points: List[BPoint]
     name: str = ""
     sizeZ: float = 0.0
 
