@@ -39,10 +39,10 @@ class Bim:
         incorrect_transits: List[Tuple[Transit, Zone]] = []
         for t in self.transits.values():
             z_linked: Zone = self.zones[t.output[0]]
-            # TODO Calculate the width for transits of type DoorWay
-            if not (t.sign == BSign.DoorWayOut) and t.sign == BSign.DoorWay:
-                if z_linked.sign == BSign.Staircase and self.zones[t.output[1]].sign == BSign.Staircase:
-                    continue
+            if t.sign == BSign.DoorWay and z_linked.sign == BSign.Staircase:
+                z2_linked = self.zones[t.output[1]]
+                if z2_linked.sign == BSign.Staircase:
+                    t.width = (math.sqrt(z_linked.area) + math.sqrt(z2_linked.area)) / 2
 
             if not t.calculate_width(z_linked, self.zones[t.output[1]] if len(t.output) > 1 else None):
                 incorrect_transits.append((t, z_linked))
