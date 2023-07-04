@@ -5,7 +5,6 @@ from BimEvac import Moving
 from BimDataModel import BSign
 from typing import List
 
-# building = BimDataModel.mapping_building('resources/example-one-exit.json')
 building = BimDataModel.mapping_building("resources/example-two-exits.json")
 
 bim = Bim(building)

@@ -37,7 +37,6 @@ class Bim:
                         self._sz_output.append(e.id)
 
         incorrect_transits: List[Tuple[Transit, Zone]] = []
-        t: Transit  # for typing the variable
         for t in self.transits.values():
             z_linked: Zone = self.zones[t.output[0]]
             # TODO Calculate the width for transits of type DoorWay
@@ -165,7 +164,7 @@ class Transit(BBuildElement):
     @width.setter
     def width(self, w: float) -> None:
         if w <= self.MIN_WIDTH:
-            raise TransitWidthError("Width of transit below or equal 0.5 is not possible")
+            raise TransitWidthError(f"Width of transit below or equal {self.MIN_WIDTH} is not possible")
         self._width = w
 
     def calculate_width(self, zone_element1: BBuildElement, zone_element2: Union[BBuildElement, None]) -> bool:
@@ -182,8 +181,9 @@ class Transit(BBuildElement):
         return False
 
     def prepare_transit(self, zone_element: BBuildElement) -> Union[TransitEdges, None]:
-        """Сортировка ребер проема на параллельные стенам комнат, которые соединяют и перпендикулярные
+        """Сортировка ребер проема на параллельные и перпендикулярные стенам комнат
 
+        ```
         ┌─────────┐ ┌──────────┐
         │         │ │          │
         │      A┌─┼─┼─┐B       │
@@ -192,6 +192,7 @@ class Transit(BBuildElement):
         │      D└─┼─┼─┘C       │
         │         │ │          │
         └─────────┘ └──────────┘
+        ```
 
         AD, BC - parallel
         AB, CD - normal
@@ -279,6 +280,7 @@ class Transit(BBuildElement):
         """
         Возможные варианты стыковки помещений, которые соединены проемом
         Код ниже определяет область их пересечения
+        ```
            +----+  +----+     +----+
                 |  |               | +----+
                 |  |               | |
@@ -292,6 +294,7 @@ class Transit(BBuildElement):
            +----+  |               | |
                    +----+          | +----+
                               +----+
+        ```
         *************************************************************************
         1. Определить грани помещения, которые пересекает короткая сторона проема
         2. Вычислить среднее проекций граней друг на друга
@@ -474,7 +477,8 @@ if __name__ == "__main__":
 
     print(z1)
     print(t1)
-    t1.calculate_width(be1)
+    # FIXME: add second zone
+    # t1.calculate_width(be1)
     print(t1.width)
 
     # Test Bim

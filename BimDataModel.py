@@ -62,7 +62,7 @@ def mapping_building(file_buildingjson: str) -> BBuilding:
     building: BBuilding
     bad_elements: List[Tuple[BSign, str, str, str]] = list()
 
-    with open(file_buildingjson, "r") as json_file:
+    with open(file_buildingjson, "r", encoding="utf8") as json_file:
         rjson = json.load(json_file)
 
         _levels: List[BLevel] = list()
