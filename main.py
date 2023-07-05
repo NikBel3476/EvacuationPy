@@ -23,7 +23,8 @@ for z in bim.zones.values():
 m = Moving()
 
 time = 0.0  # Длительность эвакуации
-for _ in range(1000):
+nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
+while nop > 10e-3:
     m.step(bim)
     time += Moving.MODELLING_STEP
     # for z in bim.zones.values():
@@ -34,8 +35,6 @@ for _ in range(1000):
             # print(f"{t}, Number of people: {t.num_of_people}")
 
     nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-    if nop < 10e-3:
-        break
 
     # print("========", nop, bim.safety_zone.num_of_people)
 

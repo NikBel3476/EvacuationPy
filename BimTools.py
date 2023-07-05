@@ -43,9 +43,9 @@ class Bim:
                 z2_linked = self.zones[t.output[1]]
                 if z2_linked.sign == BSign.Staircase:
                     t.width = (math.sqrt(z_linked.area) + math.sqrt(z2_linked.area)) / 2
-
-            if not t.calculate_width(z_linked, self.zones[t.output[1]] if len(t.output) > 1 else None):
-                incorrect_transits.append((t, z_linked))
+            else:
+                if not t.calculate_width(z_linked, self.zones[t.output[1]] if len(t.output) > 1 else None):
+                    incorrect_transits.append((t, z_linked))
 
         if len(incorrect_transits) > 0:
             import inspect
