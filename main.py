@@ -8,8 +8,7 @@ import asyncio
 
 
 async def main() -> None:
-    # building = BimDataModel.mapping_building("resources/example-two-exits.json")
-    building = BimDataModel.mapping_building("resources/udsu_b1_L4_v2_190701.json")
+    building = BimDataModel.mapping_building("resources/example-two-exits.json")
 
     bim = Bim(building)
     BimComplexity(bim)  # check a building
