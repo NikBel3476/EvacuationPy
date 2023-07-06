@@ -27,4 +27,4 @@ jobs:
           src: "."
       - uses: jakebailey/pyright-action@v1
       - name: Test with pytest
-        run: pytest
+        run: pytest -n logical

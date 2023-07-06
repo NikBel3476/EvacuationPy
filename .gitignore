@@ -15,3 +15,20 @@
 
 !.pre-commit-config.yaml
 !.editorconfig
+
+!resources/
+!resources/example-one-exit.json
+!resources/example-two-exits.json
+!resources/building_example.json
+!resources/one_zone_one_exit.json
+!resources/three_zones_three_transits.json
+!resources/two_levels.json
+!resources/udsu_block_1.json
+!resources/udsu_block_2.json
+!resources/udsu_block_3.json
+!resources/udsu_block_4.json
+!resources/udsu_block_5.json
+!resources/udsu_block_7.json
+
+!baseline_images
+!baseline_images/**/*
