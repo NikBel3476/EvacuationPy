@@ -13,7 +13,7 @@
 
 ### tests
 
-to run tests execute `pytest` in your terminal
+to run tests execute `pytest -n logical` in your terminal
 
 ### code linting
 
