@@ -1,19 +1,22 @@
 from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
 from uuid import UUID
-from typing import Set, Tuple, Dict, List
+from typing import Set, Tuple, Dict, List, Literal
 
 import math
 
 
+PathTypeValues = Dict[Literal["V0", "A", "D0"], float]
+ElementType = Literal["ROOM", "TRANSIT", "STAIR_DOWN", "STAIR_UP"]
+PathType = Dict[ElementType, PathTypeValues]
+
+
 class PeopleFlowVelocity(object):
-    ROOM, TRANSIT, STAIR_UP, STAIR_DOWN = range(4)
-    V0, A, D0 = range(3)
-    PATH_VALUE = {
-        ROOM: [100, 0.295, 0.51],
-        TRANSIT: [100, 0.295, 0.65],
-        STAIR_DOWN: [100, 0.400, 0.89],
-        STAIR_UP: [60, 0.305, 0.67],
+    PATH_VALUE: PathType = {
+        "ROOM": {"V0": 100, "A": 0.295, "D0": 0.51},
+        "TRANSIT": {"V0": 100, "A": 0.295, "D0": 0.65},
+        "STAIR_DOWN": {"V0": 100, "A": 0.400, "D0": 0.89},
+        "STAIR_UP": {"V0": 60, "A": 0.305, "D0": 0.67},
     }
 
     def __init__(self, projection_area: float = 0.1) -> None:
@@ -66,9 +69,9 @@ class PeopleFlowVelocity(object):
         Скорость, м/мин
         """
 
-        v0 = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.TRANSIT][PeopleFlowVelocity.V0]
-        d0 = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.TRANSIT][PeopleFlowVelocity.D0]
-        a = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.TRANSIT][PeopleFlowVelocity.A]
+        v0 = PeopleFlowVelocity.PATH_VALUE["TRANSIT"]["V0"]
+        d0 = PeopleFlowVelocity.PATH_VALUE["TRANSIT"]["D0"]
+        a = PeopleFlowVelocity.PATH_VALUE["TRANSIT"]["A"]
 
         if d > d0:
             D = d * self.projection_area
@@ -98,26 +101,26 @@ class PeopleFlowVelocity(object):
         # то принудительно устанавливаем ее на уровке 0.9 м2/м2
         d = self.D09 if d >= self.D09 else d
 
-        v0 = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.ROOM][PeopleFlowVelocity.V0]
-        d0 = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.ROOM][PeopleFlowVelocity.D0]
-        a = PeopleFlowVelocity.PATH_VALUE[PeopleFlowVelocity.ROOM][PeopleFlowVelocity.A]
+        v0 = PeopleFlowVelocity.PATH_VALUE["ROOM"]["V0"]
+        d0 = PeopleFlowVelocity.PATH_VALUE["ROOM"]["D0"]
+        a = PeopleFlowVelocity.PATH_VALUE["ROOM"]["A"]
 
         return PeopleFlowVelocity.velocity(v0, a, d0, d) if d > d0 else v0
 
-    def speed_on_stair(self, direction: int, d: float) -> float:
+    def speed_on_stair(self, direction: ElementType, d: float) -> float:
         # Если плотность потока более 0.9 м2/м2,
         # то принудительно устанавливаем ее на уровке 0.9 м2/м2
         d = self.D09 if d >= self.D09 else d
 
-        if not (direction == PeopleFlowVelocity.STAIR_DOWN or direction == PeopleFlowVelocity.STAIR_UP):
+        if not (direction == "STAIR_DOWN" or direction == "STAIR_UP"):
             raise ValueError(
                 f"Некорректный индекс направления движеия по лестнице: {direction}. \n\
                                Индекс можети принимать значение `PeopleFlowVelocity.STAIR_DOWN` или `PeopleFlowVelocity.STAIR_UP`"
             )
 
-        v0 = PeopleFlowVelocity.PATH_VALUE[direction][PeopleFlowVelocity.V0]
-        d0 = PeopleFlowVelocity.PATH_VALUE[direction][PeopleFlowVelocity.D0]
-        a = PeopleFlowVelocity.PATH_VALUE[direction][PeopleFlowVelocity.A]
+        v0 = PeopleFlowVelocity.PATH_VALUE[direction]["V0"]
+        d0 = PeopleFlowVelocity.PATH_VALUE[direction]["D0"]
+        a = PeopleFlowVelocity.PATH_VALUE[direction]["A"]
 
         return PeopleFlowVelocity.velocity(v0, a, d0, d) if d > d0 else v0
 
@@ -200,7 +203,7 @@ class Moving(object):
                   \\                          => direction = STAIR_DOWN
                    \\______   aGiverItem
             """
-            direction: int = self.pfv.STAIR_DOWN if dh > 0 else self.pfv.STAIR_UP
+            direction = "STAIR_DOWN" if dh > 0 else "STAIR_UP"
             v_zone = self.pfv.speed_on_stair(direction, gzone.density)
 
         return v_zone
@@ -323,25 +326,25 @@ if __name__ == "__main__":
 
         print("#STAIRS")
         V = {  # pyright: ignore [reportConstantRedefinition]
-            pfv.STAIR_UP: [60.00, 60.00, 52.67, 39.99, 32.57, 27.30, 23.22, 19.88, 17.06, 14.62, 12.46, 12.46],
-            pfv.STAIR_DOWN: [100.0, 100.00, 95.30, 67.60, 51.40, 39.88, 30.96, 23.67, 17.50, 12.16, 7.44, 7.44],
+            "STAIR_UP": [60.00, 60.00, 52.67, 39.99, 32.57, 27.30, 23.22, 19.88, 17.06, 14.62, 12.46, 12.46],
+            "STAIR_DOWN": [100.0, 100.00, 95.30, 67.60, 51.40, 39.88, 30.96, 23.67, 17.50, 12.16, 7.44, 7.44],
         }
 
         vals = []
         for d0 in D:
-            v = round(pfv.speed_on_stair(pfv.STAIR_DOWN, pfv.to_pm2(d0)), 2)
+            v = round(pfv.speed_on_stair("STAIR_DOWN", pfv.to_pm2(d0)), 2)
             vals.append(v)
 
-        print(f"Origin: {V[pfv.STAIR_DOWN]} DOWN")
+        print(f"Origin: {V['STAIR_DOWN']} DOWN")
         print(f"Rintd : {vals}")
         print("-----")
 
         vals = []
         for d0 in D:
-            v = round(pfv.speed_on_stair(pfv.STAIR_UP, pfv.to_pm2(d0)), 2)
+            v = round(pfv.speed_on_stair("STAIR_UP", pfv.to_pm2(d0)), 2)
             vals.append(v)
 
-        print(f"Origin: {V[pfv.STAIR_UP]} UP")
+        print(f"Origin: {V['STAIR_UP']} UP")
         print(f"Rintd : {vals}")
         print("-----")
 

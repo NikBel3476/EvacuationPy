@@ -8,7 +8,7 @@ import asyncio
 
 
 async def main() -> None:
-    building = BimDataModel.mapping_building("resources/example-two-exits.json")
+    building = BimDataModel.mapping_building("resources/udsu_block_1.json")
 
     bim = Bim(building)
     BimComplexity(bim)  # check a building
@@ -26,11 +26,11 @@ async def main() -> None:
     m = Moving()
 
     start = time.time()
-    evacuationTimeInMinutes = 0.0  # Длительность эвакуации
+    evacuation_time_in_minutes = 0.0  # Длительность эвакуации
     nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
     while nop >= 10e-3:
         m.step(bim)
-        evacuationTimeInMinutes += Moving.MODELLING_STEP
+        evacuation_time_in_minutes += Moving.MODELLING_STEP
         # for z in bim.zones.values():
         #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
         # for t in bim.transits.values():
@@ -43,7 +43,7 @@ async def main() -> None:
         # print("========", nop, bim.safety_zone.num_of_people)
     end = time.time()
 
-    print(f"Длительность эвакуации: {evacuationTimeInMinutes*60:.2f} с. ({evacuationTimeInMinutes:.2f} мин.)")
+    print(f"Длительность эвакуации: {evacuation_time_in_minutes * 60:.2f} с. ({evacuation_time_in_minutes:.2f} мин.)")
     print(f"Количество людей: в здании -- {nop:.0f}, в безопасной зоне -- {bim.safety_zone.num_of_people:.0f} чел.")
     print(f"Время работы: {end - start:.3f} s")
 
