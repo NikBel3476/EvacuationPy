@@ -6,7 +6,6 @@ readme = 'README.md'
 requires-python = '>=3.8'
 
 dependencies = [
-    'scipy == 1.10.1',
     'tripy@git+https://github.com/NikBel3476/tripy',
 ]
 
@@ -16,7 +15,7 @@ all = [
     'ruff == 0.0.272',
     'pytest == 7.3.2',
     'pytest-xdist[psutil] == 3.3.1',
-    'pyright == 1.1.316',
+    'pyright ~= 1.1',
     'black[d] == 23.3.0',
     'pre-commit == 3.3.3',
 ]
