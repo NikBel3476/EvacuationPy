@@ -44,7 +44,7 @@ async def main() -> None:
     end = time.time()
 
     print(f"Длительность эвакуации: {evacuation_time_in_minutes * 60:.2f} с. ({evacuation_time_in_minutes:.2f} мин.)")
-    print(f"Количество людей: в здании -- {nop:.0f}, в безопасной зоне -- {bim.safety_zone.num_of_people:.0f} чел.")
+    print(f"Количество людей: в здании -- {nop:.2f}, в безопасной зоне -- {bim.safety_zone.num_of_people:.2f} чел.")
     print(f"Время работы: {end - start:.3f} s")
 
 
