@@ -158,7 +158,13 @@ class Moving(object):
                 moved_people = self.part_of_people_flow(receiving_zone, giving_zone, transit)
 
                 receiving_zone.num_of_people += moved_people
-                giving_zone.num_of_people -= moved_people
+                try:
+                    giving_zone.num_of_people -= moved_people
+                except ValueError:
+                    if abs(giving_zone.num_of_people - moved_people) < 0.5:
+                        giving_zone.num_of_people = 0
+                    else:
+                        raise
                 transit.num_of_people = moved_people
                 self.direction_pairs[transit.id] = (giving_zone, receiving_zone)
 
