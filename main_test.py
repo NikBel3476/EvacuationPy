@@ -15,19 +15,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamps_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamps_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -39,14 +36,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamps_list)):
-            p.append(round(timestamps_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamps_list)):
+        #     p.append(round(timestamps_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -60,19 +55,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -84,14 +76,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -105,20 +95,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -130,14 +116,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -151,20 +135,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -176,14 +156,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -197,20 +175,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -222,14 +196,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -243,20 +215,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -268,14 +236,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -289,20 +255,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -314,14 +276,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -335,20 +295,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -360,14 +316,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -381,20 +335,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -406,14 +356,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -427,20 +375,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -452,14 +396,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -473,20 +415,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -498,14 +436,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
@@ -519,20 +455,16 @@ class TestModelingExamples:
         bim = Bim(building)
         BimComplexity(bim)  # check a building
 
+        # Список комнат, не включающий безопасную зону
         wo_safety = list(filter(lambda x: not (x.id == bim.safety_zone.id), bim.zones.values()))
 
-        # Doors width
-        for t in bim.transits.values():
-            t.width = 2.0
-
         density_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # м2/м2
-        timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
+        # timestamp_list = [15.0, 20.0, 25.5, 30.0, 36.4, 42.9, 52.2, 63.2, 80.0]  # сек.
 
         times: List[float] = []  # сек.
-
         for density in density_list:
+            bim.set_density(density)
             m = Moving()
-            bim.set_density(m.pfv.to_pm2(density))
 
             num_of_people = 0.0
             for z in wo_safety:
@@ -544,14 +476,12 @@ class TestModelingExamples:
                 m.step(bim)
                 time += Moving.MODELLING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
-                if nop <= 0:
-                    break
 
             times.append(round(time * 60, 1))
 
-        p: List[float] = []
-        for i in range(len(timestamp_list)):
-            p.append(round(timestamp_list[i] / times[i], 2))
+        # p: List[float] = []
+        # for i in range(len(timestamp_list)):
+        #     p.append(round(timestamp_list[i] / times[i], 2))
 
         _, ax = plt.subplots()  # pyright: ignore [reportUnknownMemberType, reportUnknownVariableType]
         ax.plot(  # pyright: ignore [reportUnknownMemberType, reportGeneralTypeIssues]
