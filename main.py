@@ -16,7 +16,7 @@ async def main() -> None:
     # Список комнат, не включающий безопасную зону
     wo_safety: List[Zone] = list(filter(lambda x: x.id != bim.safety_zone.id, bim.zones.values()))
 
-    density = 0.1  # чел./м2
+    density = 1.0  # чел./м2
     bim.set_density(density)
 
     z: Zone

@@ -142,7 +142,7 @@ class Moving(object):
         for z in bim.zones.values():
             z.is_visited = False
 
-        zones_to_process = [bim.safety_zone]
+        zones_to_process = {bim.safety_zone}
         self._step_counter[1] = 0
 
         while len(zones_to_process) > 0:
@@ -175,11 +175,13 @@ class Moving(object):
                 transit.is_visited = True
 
                 if (
-                    len(giving_zone.output) > 1 and giving_zone not in zones_to_process
+                    len(giving_zone.output)
+                    > 1
+                    # and giving_zone not in zones_to_process
                 ):  # отсекаем помещения, в которых одна дверь
-                    zones_to_process.append(giving_zone)
+                    zones_to_process.add(giving_zone)
 
-                zones_to_process.sort(key=lambda zone: zone.potential)
+                # zones_to_process.sort(key=lambda zone: zone.potential)
 
                 self._step_counter[2] += 1
 
