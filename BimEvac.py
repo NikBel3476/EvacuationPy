@@ -1,9 +1,9 @@
+import math
+
+from itertools import repeat
 from BimDataModel import BSign
 from BimTools import Bim, Transit, Zone
-from uuid import UUID
-from typing import Tuple, Dict, List, Literal
-
-import math
+from typing import Dict, List, Literal
 
 
 PathTypeValues = Dict[Literal["V0", "A", "D0"], float]
@@ -126,66 +126,92 @@ class PeopleFlowVelocity(object):
 
 
 class Moving(object):
-    MODELLING_STEP = 0.008  # мин.
-    MIN_DENSIY = 0.1  # чел./м2
-    MAX_DENSIY = 5.0  # чел./м2
+    MODELING_STEP = 0.008  # мин.
+    MIN_DENSITY = 0.1  # чел./м2
+    MAX_DENSITY = 5.0  # чел./м2
 
-    def __init__(self) -> None:
+    bim: Bim
+    time_in_minutes: float
+
+    def __init__(self, bim: Bim) -> None:
         self.pfv = PeopleFlowVelocity(projection_area=0.1)
         self._step_counter = [0, 0, 0]
-        self.direction_pairs: Dict[UUID, Tuple[Zone, Zone]] = {}
+        # self.direction_pairs: Dict[UUID, Tuple[Zone, Zone]] = {}
+        self.bim = bim
+        self.time_in_minutes = 0.0
 
-    def step(self, bim: Bim):
+    def step(self):
         self._step_counter[0] += 1
-        for t in bim.transits.values():
+        for t in self.bim.transits.values():
             t.is_visited = False
-        for z in bim.zones.values():
-            z.is_visited = False
+            t.num_of_people = 0.0
+        for z in self.bim.zones.values():
+            if z.id != self.bim.safety_zone.id:  # TODO: why avoiding safety zone?
+                z.is_visited = False
+                z.potential = math.inf
 
-        zones_to_process = {bim.safety_zone}
+        num_of_outputs = len(list(filter(lambda t: t.sign == BSign.DoorWayOut, self.bim.transits.values())))
+        zones_to_process: List[Zone] = list(repeat(self.bim.safety_zone, num_of_outputs))
         self._step_counter[1] = 0
 
         while len(zones_to_process) > 0:
-            receiving_zone = zones_to_process.pop()
+            receiving_zone = zones_to_process.pop(0)
             self._step_counter[2] = 0
-            transit: Transit
-            for transit in (bim.transits[tid] for tid in receiving_zone.output):
+            for transit in (self.bim.transits[tid] for tid in receiving_zone.output):
                 if transit.is_visited or transit.is_blocked:
                     continue
 
-                giving_zone: Zone = bim.zones[transit.output[0]]
+                giving_zone: Zone = self.bim.zones[transit.output[0]]
+                transit_direction = 1
                 if giving_zone.id == receiving_zone.id:
-                    giving_zone = bim.zones[transit.output[1]]
+                    if len(transit.output) < 2:
+                        continue
+                    giving_zone = self.bim.zones[transit.output[1]]
+                    transit_direction = -1
 
                 # giving_zone.potential = self.potential(receiving_zone, giving_zone, transit.width)
                 moved_people = self.part_of_people_flow(receiving_zone, giving_zone, transit)
 
                 receiving_zone.num_of_people += moved_people
-                try:
-                    giving_zone.num_of_people -= moved_people
-                except ValueError:
-                    if abs(giving_zone.num_of_people - moved_people) < 0.5:
-                        giving_zone.num_of_people = 0
-                    else:
-                        raise
-                transit.num_of_people = moved_people
-                self.direction_pairs[transit.id] = (giving_zone, receiving_zone)
+                # try:
+                giving_zone.num_of_people -= moved_people
+                # except ValueError:
+                #     if abs(giving_zone.num_of_people - moved_people) < 0.5:
+                #         giving_zone.num_of_people = 0
+                #     else:
+                #         raise
+                transit.num_of_people = moved_people * transit_direction
+                # self.direction_pairs[transit.id] = (giving_zone, receiving_zone)
+
+                if receiving_zone.id != self.bim.safety_zone.id:
+                    receiving_zone.density = receiving_zone.num_of_people / receiving_zone.area
+                giving_zone.density = giving_zone.num_of_people / giving_zone.area
 
                 giving_zone.is_visited = True
                 transit.is_visited = True
 
                 if (
                     len(giving_zone.output)
-                    > 1
+                    > 1  # отсекаем помещения, в которых одна дверь
                     # and giving_zone not in zones_to_process
-                ):  # отсекаем помещения, в которых одна дверь
-                    zones_to_process.add(giving_zone)
+                ):
+                    zones_to_process.append(giving_zone)
 
-                # zones_to_process.sort(key=lambda zone: zone.potential)
+                new_giving_zone_potential = self.potential(receiving_zone, giving_zone, transit.width)
+                if new_giving_zone_potential < giving_zone.potential:
+                    giving_zone.potential = new_giving_zone_potential
+
+                zones_to_process.sort(key=lambda zone: zone.potential)
 
                 self._step_counter[2] += 1
-
             self._step_counter[1] += 1
+        self.time_in_minutes += self.MODELING_STEP
+
+    def number_of_people_inside(self):
+        return sum([z.num_of_people for z in self.bim.zones.values() if z.id != self.bim.safety_zone.id])
+
+    def building_zones(self) -> List[Zone]:
+        return [zone for zone in self.bim.zones.values() if zone.id != self.bim.safety_zone.id]
 
     def potential(self, rzone: Zone, gzone: Zone, twidth: float) -> float:
         p = math.sqrt(gzone.area) / self.speed_at_exit(rzone, gzone, twidth)
@@ -222,16 +248,18 @@ class Moving(object):
 
     def part_of_people_flow(self, rzone: Zone, gzone: Zone, transit: Transit) -> float:
         # density_min_giver_zone = 0.5 / area_giver_zone
-        min_density_gzone = self.MIN_DENSIY  # if self.MIN_DENSIY > 0 else self.pfv.projection_area * 0.5 / gzone.area
+        min_density_gzone = self.MIN_DENSITY  # if self.MIN_DENSIY > 0 else self.pfv.projection_area * 0.5 / gzone.area
 
         # Ширина перехода между зонами зависит от количества человек,
         # которое осталось в помещении. Если там слишком мало людей,
         # то они переходя все сразу, чтоб не дробить их
-        door_width = transit.width if gzone.density > min_density_gzone else gzone.area  # transit.width
-        speedatexit = self.speed_at_exit(rzone, gzone, door_width)
+        # door_width = transit.width if gzone.density > min_density_gzone else gzone.area  # transit.width
+        # speedatexit = self.speed_at_exit(rzone, gzone, door_width)
+        speedatexit = self.speed_at_exit(rzone, gzone, transit.width)
 
         # Кол. людей, которые могут покинуть помещение за шаг моделирования
-        part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit)
+        # part_of_people_flow = self.change_numofpeople(gzone, door_width, speedatexit)
+        part_of_people_flow = self.change_numofpeople(gzone, transit.width, speedatexit)
         if gzone.density <= min_density_gzone:
             if part_of_people_flow > gzone.num_of_people:
                 print("===WTF!===")
@@ -241,25 +269,27 @@ class Moving(object):
         # в нее может войти максимально возможное количество человек
         # Все другие зоны могут принять ограниченное количество человек.
         # Т.о. нужно проверить может ли принимающая зона вместить еще людей.
-        # capacity_reciving_zone - количество людей, которое еще может
+        # capacity_receiving_zone - количество людей, которое еще может
         # вместиться до достижения максимальной плотности
         # => если может вместить больше, чем может выйти, то вмещает всех вышедших,
         # иначе вмещает только возможное количество.
-        max_numofpeople = self.MAX_DENSIY * rzone.area
-        capacity_reciving_zone = max_numofpeople - rzone.num_of_people
+        if rzone.id == self.bim.safety_zone.id:
+            return part_of_people_flow
+        max_numofpeople = self.MAX_DENSITY * rzone.area
+        capacity_receiving_zone = max_numofpeople - rzone.num_of_people
         # Такая ситуация возникает при плотности в принимающем помещении более Dmax чел./м2
         # Фактически capacity_reciving_zone < 0 означает, что помещение не может принять людей
-        if capacity_reciving_zone < 0:
+        if capacity_receiving_zone < 0:
             return 0.0
         else:
-            return part_of_people_flow if (capacity_reciving_zone > part_of_people_flow) else capacity_reciving_zone
+            return part_of_people_flow if (capacity_receiving_zone > part_of_people_flow) else capacity_receiving_zone
 
     def change_numofpeople(self, gzone: Zone, twidth: float, speed_at_exit: float) -> float:
         # Величина людского потока, через проем шириной twidth, чел./мин
         P = gzone.density * speed_at_exit * twidth
         # Зная скорость потока, можем вычислить конкретное количество человек,
         # которое может перейти в принимющую зону (путем умножения потока на шаг моделирования)
-        return P * self.MODELLING_STEP
+        return P * self.MODELING_STEP
 
 
 if __name__ == "__main__":
@@ -414,7 +444,7 @@ if __name__ == "__main__":
         for _ in range(10000):
             m.step(bim)
             print(m.direction_pairs)
-            time += Moving.MODELLING_STEP
+            time += Moving.MODELING_STEP
             # for z in bim.zones.values():
             #     print(f"{z}, Potential: {z.potential}, Number of people: {z.num_of_people}")
             for t in bim.transits.values():

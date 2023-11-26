@@ -34,7 +34,7 @@ class TestModelingExamples:
             time = 0.0  # сек.
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -74,7 +74,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -114,7 +114,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -154,7 +154,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -194,7 +194,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -234,7 +234,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -274,7 +274,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -314,7 +314,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -354,7 +354,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -394,7 +394,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -434,7 +434,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
@@ -474,7 +474,7 @@ class TestModelingExamples:
             time = 0.0
             while nop >= 10e-3:
                 m.step(bim)
-                time += Moving.MODELLING_STEP
+                time += Moving.MODELING_STEP
                 nop = sum([x.num_of_people for x in wo_safety if x.is_visited])
 
             times.append(round(time * 60, 1))
